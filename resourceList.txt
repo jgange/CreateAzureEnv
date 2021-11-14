@@ -1,1 +1,2 @@
 Type=Resource Group,Location=eastus
+Type=Cosmos DB,Location=eastus,EnableMultipleWriteLocations,EnableVirtualNetwork,ApiKind=Sql,DisableKeyBasedMetadataWriteAccess,EnableFreeTier,PublicNetworkAccess=Enabled,BackupIntervalInMinutes=240,BackupRetentionIntervalInHours=8,BackupStorageRedundancy=Georedundant,BackupPolicyType=Periodic

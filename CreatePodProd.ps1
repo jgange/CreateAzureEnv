@@ -35,7 +35,7 @@
     $servicePrincipal = "AzureAutomationPS",
 
     [string]
-    $logFilePath = $env:USERPROFILE+$MyInvocation.MyCommand.Name+".log",
+    $logFilePath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\CreateAzureEnvironment.log" -join "\"),
 
     [string]
     $keyVaultName = 'sre-dev-keyvault'
@@ -134,9 +134,9 @@ function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [
 
 }
 
-function createLogEntry([string] $logEntry, [string]$logFilePath)
+function createLogEntry([string] $logEntry, [string]$logFilePath, [string]$entryType)
 {
-    # stub
+    (Get-Date -Format "MM/dd/yyyy HH:mm K"),$entryType,$logEntry -join "**" | Out-File $logFilePath -Append
 }
 
 function getResourceMap([string] $filePath)
@@ -283,6 +283,12 @@ function cleanUpEnvironment ($resoureGroupName)
 }
 
 Connect-AzAccount   # this is login with my account first before switching to the service prinicipal
+
+#### Testing Section ####
+
+createLogEntry -logEntry "This is an example log entry" -logFilePath $logFilePath -entryType "INFO"
+
+exit 0
 
 #### Main Program ####
 
