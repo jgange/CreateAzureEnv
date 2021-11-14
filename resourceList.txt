@@ -1,0 +1,1 @@
+Type=Resource Group,Location=eastus

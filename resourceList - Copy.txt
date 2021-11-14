@@ -1,0 +1,4 @@
+Type=Resource Group,Location=eastus
+Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
+Type=Container Registry,Location=eastus,Sku=Premium,EnableAdminUser
+Type=Log analytics workspace,Location=eastus
