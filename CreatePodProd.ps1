@@ -62,7 +62,7 @@ $resourceTypes = @{
     "Container Registry"       = "acr"
     "Storage Account"          = "sa"
     "Service Bus Namespace"    = "sb"
-    "Cosmo DB"                 = "cos"
+    "Cosmos DB"                 = "cos"
     "Logic App"                = "lapp"
 }
 
@@ -281,8 +281,6 @@ function cleanUpEnvironment ($resoureGroupName)
 
 
 }
-
-cleanUpEnvironment "joegange"
 
 Connect-AzAccount   # this is login with my account first before switching to the service prinicipal
 
