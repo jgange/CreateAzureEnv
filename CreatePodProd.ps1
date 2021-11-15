@@ -182,15 +182,16 @@ function provisionResource($config)
     
     # Go into a while loop while resource is created. This is necessary because of dependencies on certain resources. Skip this if debug is enabled
     if ($debugMode -eq 'False') {
+        Write-Host "Verifying resource creation is complete."
         do {
-            Write-Host "Verifying resource creation is complete."
             try {
                 if ($config["Type"] -eq 'Resource Group') { $status = (Get-AzResourceGroup -Name  $config["Name"]).ProvisioningState }
                 else { $status=(Get-AzResource -ResourceName $config["Name"] -ExpandProperties).Properties.provisioningState }
             }
             catch {
-                Start-Sleep -Seconds 5
             }
+
+            Start-Sleep -Seconds 5
         } while ($status -ne 'Succeeded')
     }
     
@@ -277,6 +278,18 @@ function cleanUpEnvironment ($resoureGroupName)
     catch {
         Write-Host "Failed to remove resource group $resoureGroupName."
         $Error
+    }
+
+}
+
+function lockResourceGroup([string] $resourceGroupName)
+{
+    try {
+        New-AzResourceLock -LockName Lock-RG -LockLevel CanNotDelete -ResourceGroupName RG-CLI -Force -ErrorAction Stop
+    }
+    catch
+    {
+        Write-Host "Failed to lock resource"
     }
 
 }
