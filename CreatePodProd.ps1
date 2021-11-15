@@ -172,9 +172,7 @@ function provisionResource($config)
 
     try {
             Write-Host "Attempting to create resource: $($config["Name"])"
-            $r = Invoke-Expression $commandString
-            if ($debugMode -eq "True") { $resource.Add("Id","Bogus") }
-            else { $resource.Add("Id",$r.ResourceId) }
+            $r = Invoke-Expression $commandString -ErrorAction SilentlyContinue
         }
     catch
         {
@@ -183,7 +181,7 @@ function provisionResource($config)
         }
     
     # Go into a while loop while resource is created. This is necessary because of dependencies on certain resources. Skip this if debug is enabled
-    if (!($debugMode)) {
+    if ($debugMode -eq 'False') {
         do {
             Write-Host "Verifying resource creation is complete."
             try {
@@ -193,8 +191,11 @@ function provisionResource($config)
             catch {
                 Start-Sleep -Seconds 5
             }
-        } while ($status -ne "Succeeded")
+        } while ($status -ne 'Succeeded')
     }
+    
+    if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
+    else { $resource.Add("Id",$r.ResourceId) }
     Write-Host "Creation of resource $($config["Name"]) completed successfully."
 }
 
@@ -277,8 +278,6 @@ function cleanUpEnvironment ($resoureGroupName)
         Write-Host "Failed to remove resource group $resoureGroupName."
         $Error
     }
-    
-
 
 }
 

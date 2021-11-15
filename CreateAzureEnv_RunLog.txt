@@ -1,0 +1,154 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20211115094647
+Username: PARADISE\jgange
+RunAs User: PARADISE\jgange
+Configuration Name: 
+Machine: W002127 (Microsoft Windows NT 10.0.19041.0)
+Host Application: C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe
+Process ID: 7728
+PSVersion: 5.1.19041.1320
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.1320
+BuildVersion: 10.0.19041.1320
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Account                SubscriptionName       TenantId                             Environment
+-------                ----------------       --------                             -----------
+joe.gange@ascentgl.com International Dev/Test 7797ca53-b03e-4a03-baf0-13628aa79c92 AzureCloud
+Transcript started, output file is c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt
+WARNING: The provided service principal secret will be included in the 'AzureRmContext.json' file found in the user profile ( C:\Users\jgange\.Azure ). Please ensure that this directory has appropriate protections.
+WARNING: TenantId '7797ca53-b03e-4a03-baf0-13628aa79c92' contains more than one active subscription. First one will be selected for further use. To select another subscription, use Set-AzContext.
+Setting subscription to: Pod-Prod
+New-AzResourceGroup -Name p-pod-rg -Location eastus
+Attempting to create resource: p-pod-rg
+Creation of resource p-pod-rg completed successfully.
+Adding tags
+
+Id              : /subscriptions/71d47c29-7e5d-4ed5-8374-8be22795bb72/resourceGroups/p-pod-rg/providers/Microsoft.Resources/tags/default
+Name            : default
+Type            : Microsoft.Resources/tags
+Properties      : Microsoft.Azure.Commands.Tags.Model.PSTagsObject
+PropertiesTable :
+                  Name         Value
+                  ===========  ==========================
+                  Region       eastus
+                  Object Type  Resource Group
+                  Contact      andy.melichar@ascentgl.com
+                  Owner        andy.melichar@ascentgl.com
+                  Project      pod
+                  Department   SRE
+                  Environment  Prod
+                  Created By   SRE
+
+
+New-AzCosmosDBAccount -Name ppodcos -ResourceGroupName p-pod-rg -BackupRetentionIntervalInHours 8 -EnableVirtualNetwork -DisableKeyBasedMetadataWriteAccess -BackupIntervalInMinutes 240 -EnableMultipleWriteLocations -BackupPolicyType Periodic -EnableFreeTier $True -Location eastus -PublicNetworkAccess Enabled -ApiKind Sql
+Attempting to create resource: ppodcos
+WARNING: Invalid value for AnalyticalStorageSchemaType.  Valid values are 'WellDefined' and 'FullFidelity'.
+Creation of resource ppodcos completed successfully.
+PS C:\Users\jgange\Projects\PowerShell\CreateAzureEnv> TerminatingError(Get-AzResource): "Cannot validate argument on parameter 'ResourceId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again."
+Failed to look up resource.
+Get-AzResource : Cannot validate argument on parameter 'ResourceId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+At C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\CreatePodProd.ps1:235 char:59
++ ...     else { $resource = Get-AzResource -ResourceId $resourceId -ErrorA ...
++                                                       ~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Get-AzResource], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationError,Microsoft.Azure.Commands.ResourceManager.Cmdlets.Implementation.GetAzureResourceCmdlet
+
+ations : The term 'ations' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:2 char:1
++ ations -BackupPolicyType Periodic -EnableFreeTier $true -Location eas ...
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (ations:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+New-AzCosmosDBAccount : A parameter cannot be found that matches parameter name 'BackupStorageRedundancy'.
+At line:1 char:121
++ ... ervalInHours 8 -EnableVirtualNetwork -BackupStorageRedundancy Georedu ...
++                                          ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [New-AzCosmosDBAccount], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.Azure.Commands.CosmosDB.NewAzCosmosDBAccount
+
+Get-AzResource : Cannot validate argument on parameter 'ResourceId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+At C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\CreatePodProd.ps1:235 char:59
++ ...     else { $resource = Get-AzResource -ResourceId $resourceId -ErrorA ...
++                                                       ~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Get-AzResource], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationError,Microsoft.Azure.Commands.ResourceManager.Cmdlets.Implementation.GetAzureResourceCmdlet
+
+New-AzCosmosDBAccount : Cannot convert 'System.String' to the type 'System.Nullable`1[System.Boolean]' required by parameter 'EnableFreeTier'.
+At line:1 char:297
++ ... riteLocations -BackupPolicyType Periodic -EnableFreeTier True -Locati ...
++                                                              ~~~~
+    + CategoryInfo          : InvalidArgument: (:) [New-AzCosmosDBAccount], ParameterBindingException
+    + FullyQualifiedErrorId : CannotConvertArgument,Microsoft.Azure.Commands.CosmosDB.NewAzCosmosDBAccount
+
+Stop-Transcript : An error occurred stopping transcription: The host is not currently transcribing.
+At line:1 char:1
++ Stop-Transcript
++ ~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [Stop-Transcript], PSInvalidOperationException
+    + FullyQualifiedErrorId : InvalidOperation,Microsoft.PowerShell.Commands.StopTranscriptCommand
+
+Start-Transcript : Transcription cannot be started.
+At C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\CreatePodProd.ps1:291 char:1
++ Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [Start-Transcript], PSInvalidOperationException
+    + FullyQualifiedErrorId : CannotStartTranscription,Microsoft.PowerShell.Commands.StartTranscriptCommand
+
+Get-AzResource : Cannot validate argument on parameter 'ResourceId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+At C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\CreatePodProd.ps1:235 char:59
++ ...     else { $resource = Get-AzResource -ResourceId $resourceId -ErrorA ...
++                                                       ~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Get-AzResource], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationError,Microsoft.Azure.Commands.ResourceManager.Cmdlets.Implementation.GetAzureResourceCmdlet
+
+New-AzCosmosDBAccount : Missing an argument for parameter 'EnableFreeTier'. Specify a parameter of type 'System.Nullable`1[System.Boolean]' and try again.
+At line:1 char:281
++ ... ipleWriteLocations -BackupPolicyType Periodic -EnableFreeTier -Locati ...
++                                                   ~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [New-AzCosmosDBAccount], ParameterBindingException
+    + FullyQualifiedErrorId : MissingArgument,Microsoft.Azure.Commands.CosmosDB.NewAzCosmosDBAccount
+
+Get-AzResource : Cannot validate argument on parameter 'ResourceId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+At C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\CreatePodProd.ps1:235 char:59
++ ...     else { $resource = Get-AzResource -ResourceId $resourceId -ErrorA ...
++                                                       ~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Get-AzResource], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationError,Microsoft.Azure.Commands.ResourceManager.Cmdlets.Implementation.GetAzureResourceCmdlet
+
+-Name : The term '-Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:2
++  -Name ppodcos -ResourceGroupName p-pod-rg -BackupRetentionIntervalIn ...
++  ~~~~~
+    + CategoryInfo          : ObjectNotFound: (-Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+>> TerminatingError(): "System error."
+
+
+PS C:\Users\jgange\Projects\PowerShell\CreateAzureEnv> $resource
+
+Key                                Value
+---                                -----
+Command                            New-AzCosmosDBAccount
+Name                               ppodcos
+ResourceGroupName                  p-pod-rg
+BackupRetentionIntervalInHours     8
+EnableVirtualNetwork
+DisableKeyBasedMetadataWriteAccess
+BackupIntervalInMinutes            240
+EnableMultipleWriteLocations
+BackupPolicyType                   Periodic
+EnableFreeTier                     $True
+Location                           eastus
+PublicNetworkAccess                Enabled
+ApiKind                            Sql
+Id
+
+
+PS C:\Users\jgange\Projects\PowerShell\CreateAzureEnv> cls
