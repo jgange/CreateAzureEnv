@@ -158,6 +158,8 @@ function provisionResource($config)
     $commandString = ''
 
     [string]$type = $config["Type"]
+    [string]$name = $config["Name"]
+
     $config.Remove("Type")
 
     $config.Keys | ForEach-Object {
@@ -177,7 +179,7 @@ function provisionResource($config)
             Write-Host "Attempting to create resource: $($config["Name"])"
             $r = Invoke-Expression $commandString
             if ($type -eq 'Resource Group') { $status = [string]$r.ProvisioningState; $status }
-            else { $status=(Get-AzResource -ResourceName $name -ExpandProperties).Properties.ProvisioningState; $status }
+            else { $status=(Get-AzResource -ResourceName $name -ExpandProperties -ErrorAction Stop).Properties.ProvisioningState; $status }
         }
     catch
         {
@@ -196,13 +198,19 @@ function provisionResource($config)
     
     if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
     else { $resource.Add("Id",$r.ResourceId) }
-    Write-Host "Creation of resource $($config["Name"]) completed successfully."
+    Write-Host "Creation of resource $name completed successfully."
 }
 
 
 function assignTags([string]$resourceId, [string]$type, [string]$location)
 {
     
+    $resourceId
+    $type
+    $location
+
+    if ($resourceId.Count -le 1) { Exit 0 }
+
     # get resource type from calling get-AzResource
     $tags   = @{
     "Project"     = $project
