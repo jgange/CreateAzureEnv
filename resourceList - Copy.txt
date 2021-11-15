@@ -2,4 +2,4 @@ Type=Resource Group,Location=eastus
 Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
 Type=Container Registry,Location=eastus,Sku=Premium,EnableAdminUser
 Type=Log analytics workspace,Location=eastus
-Type=Cosmos DB,Location=eastus,EnableAutomaticFailover=False,EnableMultipleWriteLocations=True,EnableVirtualNetwork=True,ApiKind=Sql,DisableKeyBasedMetadataWriteAccess=False,EnableFreeTier=True,PublicNetworkAccess=True,EnableAnalyticalStorage=False,BackupIntervalInMinutes=240,BackupRetentionIntervalInHours=8,BackupStorageRedundancy=Georedundant,BackupPolicyType=Periodic
+Type=Cosmos DB,Location=eastus,EnableMultipleWriteLocations,EnableVirtualNetwork,ApiKind=Sql,DisableKeyBasedMetadataWriteAccess,EnableFreeTier,PublicNetworkAccess=Enabled,BackupIntervalInMinutes=240,BackupRetentionIntervalInHours=8,BackupStorageRedundancy=Georedundant,BackupPolicyType=Periodic

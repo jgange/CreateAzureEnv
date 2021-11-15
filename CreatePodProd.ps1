@@ -92,7 +92,7 @@ $resourceCommand = @{
     "Container Registry"       = "New-AzContainerRegistry"
     "Storage Account"          = "New-AzStorageAccount"
     "Service Bus Namespace"    = "New-AzServiceBusNamespace"
-    "Cosmo DB"                 = "New-AzCosmosDBSqlDatabase"
+    "Cosmos DB"                = "New-AzCosmosDBAccount"
     "Logic App"                = "New-AzLogicApp"
 }
 
@@ -286,11 +286,9 @@ Connect-AzAccount   # this is login with my account first before switching to th
 
 #### Testing Section ####
 
-createLogEntry -logEntry "This is an example log entry" -logFilePath $logFilePath -entryType "INFO"
-
-exit 0
-
 #### Main Program ####
+
+Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"
 
 $env       = $envMap[$environment]                                                       # Environment
 $filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"  
@@ -358,5 +356,7 @@ $resourceList | ForEach-Object {
 }
 
 Write-Host "Completed run."
+
+Stop-Transcript
 
 exit 0
