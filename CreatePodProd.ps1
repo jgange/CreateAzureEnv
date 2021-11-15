@@ -157,6 +157,9 @@ function provisionResource($config)
 {
     $commandString = ''
 
+    [string]$type = $config["Type"]
+    $config.Remove("Type")
+
     $config.Keys | ForEach-Object {
         $key = $_
         $value = $config[$key]
@@ -170,27 +173,23 @@ function provisionResource($config)
 
     $commandString
 
-    try {
+    try {           
             Write-Host "Attempting to create resource: $($config["Name"])"
-            $r = Invoke-Expression $commandString -ErrorAction SilentlyContinue
+            $r = Invoke-Expression $commandString
+            if ($type -eq 'Resource Group') { $status = [string]$r.ProvisioningState; $status }
+            else { $status=(Get-AzResource -ResourceName $name -ExpandProperties).Properties.ProvisioningState; $status }
         }
     catch
         {
             Write-Host "An error occurred during resource creation."                      
             $Error
         }
-    
+
     # Go into a while loop while resource is created. This is necessary because of dependencies on certain resources. Skip this if debug is enabled
+    
     if ($debugMode -eq 'False') {
         Write-Host "Verifying resource creation is complete."
         do {
-            try {
-                if ($config["Type"] -eq 'Resource Group') { $status = (Get-AzResourceGroup -Name  $config["Name"]).ProvisioningState }
-                else { $status=(Get-AzResource -ResourceName $config["Name"] -ExpandProperties).Properties.provisioningState }
-            }
-            catch {
-            }
-
             Start-Sleep -Seconds 5
         } while ($status -ne 'Succeeded')
     }
@@ -344,8 +343,6 @@ $resourceList | ForEach-Object {
     }
 
     $resourceType = $tempHash["Type"]                                                                                  # Save this value because it will be removed so we can iterate easily
-
-    $tempHash.Remove("Type")
 
     # Add remaining properties
     $tempHash.Keys | ForEach-Object {
