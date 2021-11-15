@@ -197,7 +197,10 @@ function provisionResource($config)
     }
     
     if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
-    else { $resource.Add("Id",$r.ResourceId) }
+    else { 
+        $resource.Add("Id",$r.ResourceId)
+        $resource 
+    }
     Write-Host "Creation of resource $name completed successfully."
 }
 
@@ -209,7 +212,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
     $type
     $location
 
-    if ($resourceId.Count -le 1) { Exit 0 }
+    if ($resourceId.Length -le 1) { Exit 0 }
 
     # get resource type from calling get-AzResource
     $tags   = @{
