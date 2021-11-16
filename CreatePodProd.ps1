@@ -157,6 +157,8 @@ function provisionResource($config)
 {
     $commandString = ''
 
+    # identify the Id field, it can change with object type
+
     [string]$type = $config["Type"]
     [string]$name = $config["Name"]
 
@@ -178,6 +180,7 @@ function provisionResource($config)
     try {           
             Write-Host "Attempting to create resource: $($config["Name"])"
             $r = Invoke-Expression $commandString
+            $r
             if ($type -eq 'Resource Group') { $status = [string]$r.ProvisioningState; $status }
             else { $status=(Get-AzResource -ResourceName $name -ExpandProperties -ErrorAction Stop).Properties.ProvisioningState; $status }
         }
@@ -196,9 +199,11 @@ function provisionResource($config)
         } while ($status -ne 'Succeeded')
     }
     
-    if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
+    if ($debugMode -eq 'True') {
+        $resource.Add("Id","Bogus")
+    }
     else { 
-        $resource.Add("Id",$r.ResourceId)
+        $resource.Add("Id",$r.Id)
         $resource 
     }
     Write-Host "Creation of resource $name completed successfully."
@@ -367,6 +372,12 @@ $resourceList | ForEach-Object {
     }
 
     provisionResource $resource
+
+    $resource
+    Write-Host "Resource Id"
+    $resource["Id"]
+
+    if ($resource["Name"] -ne 'p-pod-rg') { exit 0 }
 
     assignTags $resource["Id"] $resourceType $resource["Location"]
    
