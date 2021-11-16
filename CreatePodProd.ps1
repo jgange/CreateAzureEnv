@@ -94,6 +94,7 @@ $resourceCommand = @{
     "Service Bus Namespace"    = "New-AzServiceBusNamespace"
     "Cosmos DB"                = "New-AzCosmosDBAccount"
     "Logic App"                = "New-AzLogicApp"
+    "Deployment"               = "New-AzResourceGroupDeployment"
 }
 
 
@@ -203,7 +204,7 @@ function provisionResource($config)
         $resource.Add("Id","Bogus")
     }
     else { 
-        $resource.Add("Id",$r.Id)
+        $resource.Add("Id",$r.ResourceId)
         $resource 
     }
     Write-Host "Creation of resource $name completed successfully."
@@ -389,5 +390,3 @@ $resourceList | ForEach-Object {
 Write-Host "Completed run."
 
 Stop-Transcript
-
-exit 0

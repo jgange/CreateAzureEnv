@@ -1,2 +1,3 @@
 Type=Resource Group,Location=eastus
-Type=Cosmos DB,Location=eastus,EnableMultipleWriteLocations,ApiKind=Sql,DisableKeyBasedMetadataWriteAccess,EnableFreeTier=$True,PublicNetworkAccess=Enabled,BackupIntervalInMinutes=240,BackupRetentionIntervalInHours=8,BackupPolicyType=Periodic,AnalyticalStorageSchemaType=WellDefined
+Type=Log analytics workspace,Location=eastus
+Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
