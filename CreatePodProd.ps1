@@ -94,7 +94,7 @@ $resourceCommand = @{
     "Service Bus Namespace"    = "New-AzServiceBusNamespace"
     "Cosmos DB"                = "New-AzCosmosDBAccount"
     "Logic App"                = "New-AzLogicApp"
-    "Deployment"               = "New-AzResourceGroupDeployment"
+    "Azure Deployment"         = "New-AzResourceGroupDeployment"
 }
 
 
@@ -377,8 +377,6 @@ $resourceList | ForEach-Object {
     $resource
     Write-Host "Resource Id"
     $resource["Id"]
-
-    if ($resource["Name"] -ne 'p-pod-rg') { exit 0 }
 
     assignTags $resource["Id"] $resourceType $resource["Location"]
    

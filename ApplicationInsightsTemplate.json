@@ -11,9 +11,6 @@
         "regionId": {
             "type": "string"
         },
-        "requestSource": {
-            "type": "string"
-        },
         "workspaceResourceId": {
             "type": "string"
         }
@@ -28,8 +25,12 @@
                 "ApplicationId": "[parameters('name')]",
                 "Application_Type": "[parameters('type')]",
                 "Flow_Type": "Redfield",
-                "Request_Source": "[parameters('requestSource')]",
-                "WorkspaceResourceId": "[parameters('workspaceResourceId')]"
+                "Request_Source": "IbizaAIExtension",
+                "WorkspaceResourceId": "[parameters('workspaceResourceId')]",
+                "IngestionMode": "LogAnalytics",
+                "RetentionInDays": 90,
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
             }
         }
     ]

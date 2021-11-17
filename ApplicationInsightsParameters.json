@@ -3,19 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "name": {
-      "value": "<resource-name>"
+      "value": "empty"
     },
     "type": {
-      "value": "microsoft.insights/components"
+      "value": "web"
     },
     "regionId": {
       "value": "eastus"
     },
-    "requestSource": {
-      "value": ""
-    },
     "workspaceResourceId": {
-            "value": "<resource-id>"
+            "value": "empty"
     }
   }
 }

@@ -1,3 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=Log analytics workspace,Location=eastus
-Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
+Type=Log analytics workspace,Location=eastus,Sku=pergb2018
