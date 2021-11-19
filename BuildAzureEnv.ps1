@@ -38,7 +38,10 @@
     $logFilePath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\CreateAzureEnvironment.log" -join "\"),
 
     [string]
-    $keyVaultName = 'sre-dev-keyvault'
+    $keyVaultName = 'sre-dev-keyvault',
+
+    [string]
+    $scriptPath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\" -join "\")
 )
 
 # This script is designed to roll out an environment
@@ -109,8 +112,8 @@ $envMap = @{
 $resource = New-Object System.Collections.Generic.Dictionary"[String,String]"
 $resourceList = [System.Collections.ArrayList]@()
 
-$templateFilePath = "C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\ApplicationInsightsTemplate.json"
-$templateParameterFilePath = "C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\ApplicationInsightsParameters.json"
+$templateFilePath          = $scriptPath,"ApplicationInsightsTemplate.json" -join "\"                  
+$templateParameterFilePath = $scriptPath, "ApplicationInsightsParameters.json" -join "\"
 
 $parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
 
@@ -216,9 +219,13 @@ function provisionResource($config)
 
 function createAzureDeployment($config)
 {
+
+    $config
+    
     [string]$deploymentName = ("DeployAppInsights", (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_")
-    $name = $environment,$project,$resourceType -join "_"
-    $workspaceResourceId = (Get-AzResource -ResourceGroupName p-pod-rg -Name ($environment,$project,"law" -join "-")).ResourceId
+    
+    $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
+    $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
@@ -231,10 +238,11 @@ function createAzureDeployment($config)
             $parameterFile.parameters.$prop = $tempHash
         }
     }
-    $parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
+    $parameterFile
+    #$parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
 
     # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental -WhatIf 
-    New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
+    # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
 
 }
 
@@ -344,7 +352,7 @@ Connect-AzAccount   # this is login with my account first before switching to th
 
 #### Main Program ####
 
-Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"
+if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }
 
 $env       = $envMap[$environment]                                                       # Environment
 $filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"  
@@ -422,4 +430,4 @@ $resourceList | ForEach-Object {
 
 Write-Host "Completed run."
 
-Stop-Transcript
+if ($debugMode -eq "False") { Stop-Transcript }
