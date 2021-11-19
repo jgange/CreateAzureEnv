@@ -41,7 +41,7 @@
     $keyVaultName = 'sre-dev-keyvault',
 
     [string]
-    $scriptPath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\" -join "\")
+    $scriptPath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\")
 )
 
 # This script is designed to roll out an environment
@@ -116,6 +116,7 @@ $templateFilePath          = $scriptPath,"ApplicationInsightsTemplate.json" -joi
 $templateParameterFilePath = $scriptPath, "ApplicationInsightsParameters.json" -join "\"
 
 $parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
+
 
 ### Function Definitions ###
 
@@ -212,7 +213,6 @@ function provisionResource($config)
     }
     else { 
         $resource.Add("Id",$r.ResourceId)
-        $resource 
     }
     Write-Host "Creation of resource $name completed successfully."
 }
@@ -220,12 +220,14 @@ function provisionResource($config)
 function createAzureDeployment($config)
 {
 
-    $config
-    
     [string]$deploymentName = ("DeployAppInsights", (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_")
     
     $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
+
+    #$name
+    #$workspaceResourceId
+    #$parameterFile.parameters
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
@@ -235,11 +237,13 @@ function createAzureDeployment($config)
         if ($value -eq 'empty') {    
             $newValue = (Get-Variable -Name $prop).Value
             $tempHash.Add("Value",$newValue)
+            $newValue
+            $tempHash
             $parameterFile.parameters.$prop = $tempHash
         }
     }
-    $parameterFile
-    #$parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
+    $parameterFile.parameters
+    $parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
 
     # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental -WhatIf 
     # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
@@ -254,7 +258,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
     $type
     $location
 
-    if ($resourceId.Length -le 1) { Exit 0 }
+    if ($resourceId.Length -le 1) { Exit 0; Stop-Transcript }
 
     # get resource type from calling get-AzResource
     $tags   = @{
