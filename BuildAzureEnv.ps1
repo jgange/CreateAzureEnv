@@ -210,6 +210,11 @@ function provisionResource($config)
     Write-Host "Creation of resource $name completed successfully."
 }
 
+function createAzureDeployment()
+{
+    # function stub
+}
+
 
 function assignTags([string]$resourceId, [string]$type, [string]$location)
 {
@@ -370,6 +375,11 @@ $resourceList | ForEach-Object {
     {
         $resource.Add("WhatIf","")
         $resource.Add("ErrorAction","Stop")
+    }
+
+    if ($resource.Type -eq "Azure Deployment")
+    {
+        # createAzureDeployment
     }
 
     provisionResource $resource
