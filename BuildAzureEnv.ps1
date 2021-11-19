@@ -109,6 +109,10 @@ $envMap = @{
 $resource = New-Object System.Collections.Generic.Dictionary"[String,String]"
 $resourceList = [System.Collections.ArrayList]@()
 
+$templateFilePath = "C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\ApplicationInsightsTemplate.json"
+$templateParameterFilePath = "C:\Users\jgange\Projects\PowerShell\CreateAzureEnv\ApplicationInsightsParameters.json"
+
+$parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
 
 ### Function Definitions ###
 
@@ -210,9 +214,28 @@ function provisionResource($config)
     Write-Host "Creation of resource $name completed successfully."
 }
 
-function createAzureDeployment()
+function createAzureDeployment($config)
 {
-    # function stub
+    [string]$deploymentName = ("DeployAppInsights", (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_")
+    $name = $environment,$project,$resourceType -join "_"
+    $workspaceResourceId = (Get-AzResource -ResourceGroupName p-pod-rg -Name ($environment,$project,"law" -join "-")).ResourceId
+
+    $parameterFile.parameters | get-member -type properties | ForEach-Object {
+        $prop  = $_.Name
+        $value = $parameterFile.parameters.$($_.Name).value
+        $tempHash = @{}
+
+        if ($value -eq 'empty') {    
+            $newValue = (Get-Variable -Name $prop).Value
+            $tempHash.Add("Value",$newValue)
+            $parameterFile.parameters.$prop = $tempHash
+        }
+    }
+    $parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
+
+    # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental -WhatIf 
+    New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
+
 }
 
 
@@ -379,10 +402,12 @@ $resourceList | ForEach-Object {
 
     if ($resource.Type -eq "Azure Deployment")
     {
-        # createAzureDeployment
+        createAzureDeployment $resource
     }
-
-    provisionResource $resource
+    else 
+    {
+        provisionResource $resource
+    }
 
     $resource
     Write-Host "Resource Id"
