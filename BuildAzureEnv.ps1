@@ -280,9 +280,7 @@ function createAzureDeployment($config)
         $resource.Add("Id","Bogus")
     }
     else { 
-        $resource = Get-AzResource -Name $r.ParametersString.Name -ResourceGroupName $r.ResourceGroupName
-        $resource
-        $resource.Add("Id",$resource.ResourceId)
+        $resource.Add("Id",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).ResourceId)
     }
     Write-Host "Creation of resource $name completed successfully."
 
