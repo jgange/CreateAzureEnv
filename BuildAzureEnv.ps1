@@ -281,6 +281,7 @@ function createAzureDeployment($config)
     }
     else { 
         $resource.Add("Id",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).ResourceId)
+        $resource.Add("Location",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).Location)    # This is required b/c we don't get this from the resource list file for a deployment
     }
     Write-Host "Creation of resource $name completed successfully."
 
