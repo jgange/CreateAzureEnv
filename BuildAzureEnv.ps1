@@ -269,7 +269,6 @@ function createAzureDeployment($config)
             Write-Host "Running the deployment: $($config["Name"])"
             $r = Invoke-Expression $commandString
             $r
-            $name
         }
     catch
         {
@@ -277,18 +276,16 @@ function createAzureDeployment($config)
             $Error
         }
 
-    <#
     if ($debugMode -eq 'True') {
         $resource.Add("Id","Bogus")
     }
     else { 
-        $resource.Add("Id",$r.ResourceId)
+        $resource = Get-AzResource -Name $r.ParametersString.Name -ResourceGroupName $r.ResourceGroupName
+        $resource
+        $resource.Add("Id",$resource.ResourceId)
     }
     Write-Host "Creation of resource $name completed successfully."
 
-    # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental -WhatIf 
-    # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
-#>
 }
 
 
