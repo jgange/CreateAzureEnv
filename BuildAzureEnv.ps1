@@ -273,7 +273,11 @@ function createAzureDeployment($config)
     catch
         {
             Write-Host "An error occurred during resource creation."                      
-            $Error
+            $Error[0]
+            $Error[0].CategoryInfo
+            $Error[0].ErrorDetails
+            Stop-Transcript
+            exit 1
         }
 
     if ($debugMode -eq 'True') {
@@ -446,8 +450,9 @@ $resourceList | ForEach-Object {
     if ($debugMode -eq "True")
     {
         $resource.Add("WhatIf","")
-        $resource.Add("ErrorAction","Stop")
     }
+
+    $resource.Add("ErrorAction","Stop")                                                                                # Add error trapping
 
     if ($resource.Type -eq "Azure Deployment")
     {

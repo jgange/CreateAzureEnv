@@ -1,3 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=Log analytics workspace,Location=eastus,Sku=pergb2018
-Type=Azure Deployment,TemplateFile=ApplicationInsightsTemplate.json,TemplateParameterFile=ApplicationInsightsParameters.json,Mode=Incremental,ResourceType=Application Insights
+Type=App Config,Location=eastus,sku=standard
