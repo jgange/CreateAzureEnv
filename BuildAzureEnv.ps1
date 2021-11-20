@@ -220,14 +220,10 @@ function provisionResource($config)
 function createAzureDeployment($config)
 {
 
-    [string]$deploymentName = ("DeployAppInsights", (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_")
+    [string]$deploymentName = ("Deploy",$config["ResourceType"], (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_").Replace(" ","-")
     
     $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
-
-    #$name
-    #$workspaceResourceId
-    #$parameterFile.parameters
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
@@ -242,12 +238,57 @@ function createAzureDeployment($config)
             $parameterFile.parameters.$prop = $tempHash
         }
     }
-    $parameterFile.parameters
+
     $parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
+
+    $config["Name"] = $deploymentName                                                      # change the calculated name value to the deployment name value. It is incorrect since this is a deployment.
+    $resourceType   = $config["ResourceType"]                                                # capture the resource type so we can retrieve the resourceId once the resource has been created
+    $name           = $config["Name"]
+
+    $commandString  = ''
+
+    $config.Remove("Type")
+    $config.Remove("ResourceType")
+
+    # identify the Id field, it can change with object type
+
+    $config.Keys | ForEach-Object {
+        $key = $_
+        $value = $config[$key]
+        
+        if ($key.ToLower() -eq 'command') { $segment = $value + " " }
+        elseif ($value -ne "") { $segment = "-" + $key + " " + $value + " " }
+        elseif ($value -eq "") { $segment = "-" + $key + " " }
+
+        $commandString = $commandString + $segment
+    }
+
+    $commandString
+
+    try {           
+            Write-Host "Running the deployment: $($config["Name"])"
+            $r = Invoke-Expression $commandString
+            $r
+            $name
+        }
+    catch
+        {
+            Write-Host "An error occurred during resource creation."                      
+            $Error
+        }
+
+    <#
+    if ($debugMode -eq 'True') {
+        $resource.Add("Id","Bogus")
+    }
+    else { 
+        $resource.Add("Id",$r.ResourceId)
+    }
+    Write-Host "Creation of resource $name completed successfully."
 
     # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name "ProdPodDeployment_11_18_2021_16_28_10" -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental -WhatIf 
     # New-AzResourceGroupDeployment -ResourceGroupName p-pod-rg -Name $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $templateParameterFilePath -Mode Incremental
-
+#>
 }
 
 
@@ -258,7 +299,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
     $type
     $location
 
-    if ($resourceId.Length -le 1) { Exit 0; Stop-Transcript }
+    if ($resourceId.Length -le 1) { Stop-Transcript; Exit 0 }
 
     # get resource type from calling get-AzResource
     $tags   = @{
