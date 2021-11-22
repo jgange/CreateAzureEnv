@@ -132,10 +132,7 @@ function getNameSpaces($baseEnv)
 
     $rgName  = $envMap[$baseEnv],$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
     $subName = $project,$baseEnv -join $separators["Azure Subscription"]
-    
-    $rgName
-    $subName
-    
+
     Set-AzContext -Subscription $subName
     (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
         $null=$azureNameSpaces.Add($_.Split("/")[0])
