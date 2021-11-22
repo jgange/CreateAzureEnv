@@ -468,7 +468,7 @@ $resourceList | ForEach-Object {
         $resource.Add("WhatIf","")
     }
 
-    $resource.Add("ErrorAction","SilentlyContinue")                                                                                # Add error trapping
+    $resource.Add("ErrorAction","Stop")                                                                                # Add error trapping
 
     if ($resource.Type -eq "Azure Deployment")
     {
