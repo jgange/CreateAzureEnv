@@ -79,12 +79,12 @@ $separators = @{
     "Application Insights"     = "-"
     "Azure Kubernetes Service" = "-"
     "App Service Plan"         = "-"
+    "Logic App"                = "-"
     "Key Vault"                = "-"
     "Container Registry"       = "-"
     "Storage Account"          = ""
     "Service Bus Namespace"    = ""
     "Cosmo DB"                 = "-"
-    "Logic App"                = "-"
     "Azure Subscription"       = '-'
 }
 
@@ -95,12 +95,12 @@ $resourceCommand = @{
     "Application Insights"     = "New-AzApplicationInsights"
     "Azure Kubernetes Service" = "New-AzAksCluster"
     "App Service Plan"         = "New-AzAppServicePlan"
+    "Logic App"                = 'New-AzLogicApp'
     "Key Vault"                = "New-AzKeyVault"
     "Container Registry"       = "New-AzContainerRegistry"
     "Storage Account"          = "New-AzStorageAccount"
     "Service Bus Namespace"    = "New-AzServiceBusNamespace"
     "Cosmos DB"                = "New-AzCosmosDBAccount"
-    "Logic App"                = "New-AzLogicApp"
     "Azure Deployment"         = "New-AzResourceGroupDeployment"
 }
 

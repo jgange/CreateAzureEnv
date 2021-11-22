@@ -1,2 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=Service Bus Namespace,Location=eastus,SkuName=Standard
+Type=App Service Plan,Location=eastus,Tier=Standard,NumberofWorkers=1,WorkerSize=Small,PerSiteScaling=False

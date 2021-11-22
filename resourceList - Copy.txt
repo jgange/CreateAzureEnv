@@ -2,6 +2,7 @@ Type=Resource Group,Location=eastus
 Type=Log analytics workspace,Location=eastus
 Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
 Type=App Config,Location=eastus,sku=standard
+Type=Service Bus Namespace,Location=eastus,SkuName=Standard
 Type=Container Registry,Location=eastus,Sku=Premium,EnableAdminUser
 Type=Cosmos DB,Location=eastus,EnableMultipleWriteLocations,ApiKind=Sql,DisableKeyBasedMetadataWriteAccess,EnableFreeTier=$True,PublicNetworkAccess=Enabled,BackupIntervalInMinutes=240,BackupRetentionIntervalInHours=8,BackupPolicyType=Periodic,AnalyticalStorageSchemaType=WellDefined
 Type=Azure Deployment,TemplateFile=ApplicationInsightsTemplate.json,TemplateParameterFile=ApplicationInsightsParameters.json,Mode=Incremental,ResourceType=Application Insights
