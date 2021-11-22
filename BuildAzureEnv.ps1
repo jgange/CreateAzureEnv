@@ -117,6 +117,7 @@ $templateParameterFilePath = $scriptPath, "ApplicationInsightsParameters.json" -
 
 $parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
 
+$azureNameSpaces = [System.Collections.ArrayList]@()
 
 ### Function Definitions ###
 
@@ -143,21 +144,25 @@ function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [
 
 }
 
-function registerProvider()
+function getNameSpaces()
 {
     # Get the list of resources in the primary Development environment resource group since it is the reference environment
     # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
 
-    $resourceList = [System.Collections.ArrayList]@()
     $rgName = $envMap["Dev"],$project,$resourceTypes["Resource Group"] -join $separator
     Set-AzContext -Subscription $project,$envMap["Dev"] -join $separator
     (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
-        $null=$resourceList.Add($_.Split("/")[0])
+        $null=$azureNameSpaces.Add($_.Split("/")[0])
     } 
+}
 
-    $r = $resourceList | Sort-Object | Get-Unique
+function registerProvider()
+{
+    # This function must be called after the connectToAzure function because it relies on the proper subscription context to be set.
+    # I should add error handling to this to manage that exception case.
+
+    $r = $azureNameSpaces | Sort-Object | Get-Unique
     $r | ForEach-Object { Register-AzResourceProvider -ProviderNamespace $_ }
-
 }
 
 function createLogEntry([string] $logEntry, [string]$logFilePath, [string]$entryType)
@@ -407,9 +412,15 @@ function lockResourceGroup([string] $resourceGroupName)
 
 }
 
+getNameSpaces       # Register any required namespaces to provision resources for this subscription.
+
 Connect-AzAccount   # this is login with my account first before switching to the service prinicipal
 
+registerProvider    # This registers the list of resources from the Dev subscription project resource group in this subscription.
+
 #### Testing Section ####
+
+exit 0
 
 #### Main Program ####
 
