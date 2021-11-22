@@ -130,8 +130,13 @@ function getNameSpaces($baseEnv)
     # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
     # The function accepts an environment parameter to identify the reference subscription/resource group.
 
-    $rgName = $envMap[$baseEnv],$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
-    Set-AzContext -Subscription [string]($project,$envMap[$baseEnv] -join $separators["Azure Subscription"])
+    $rgName  = $baseEnv,$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
+    $subName = $project,$baseEnv -join $separators["Azure Subscription"]
+    
+    $rgName
+    $subName
+    
+    Set-AzContext -Subscription $subName
     (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
         $null=$azureNameSpaces.Add($_.Split("/")[0])
     } 
@@ -419,11 +424,11 @@ function lockResourceGroup([string] $resourceGroupName)
 
 #### Testing Section ####
 
-getNameSpaces "Dev"       # Register any required namespaces to provision resources for this subscription.
+getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
 
-Connect-AzAccount   # this is login with my account first before switching to the service prinicipal
+Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
-registerProvider    # This registers the list of resources from the Dev subscription project resource group in this subscription.
+registerProvider                          # This registers the list of resources from the Dev subscription project resource group in this subscription.
 
 exit 0
 
