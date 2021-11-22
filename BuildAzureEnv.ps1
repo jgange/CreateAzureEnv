@@ -130,7 +130,7 @@ function getNameSpaces($baseEnv)
     # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
     # The function accepts an environment parameter to identify the reference subscription/resource group.
 
-    $rgName  = $baseEnv,$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
+    $rgName  = $envMap[$baseEnv],$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
     $subName = $project,$baseEnv -join $separators["Azure Subscription"]
     
     $rgName
