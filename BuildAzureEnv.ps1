@@ -286,11 +286,6 @@ function createAzureDeployment($config)
             Write-Host "Running the deployment: $($config["Name"])"
             $r = Invoke-Expression $commandString
             $r
-            if ($Error[0].CategoryInfo.Category -eq 'InvalidOperation' -and $Error[0].CategoryInfo.Activity -eq 'New-AzAppConfigurationStore_CreateExpanded' -and $Error[0].ErrorDetails -like 'The subscription is not registered to use namespace')
-            {
-                Register-AzResourceProvider -ProviderNamespace "
-
-            }
         }
     catch
         {
