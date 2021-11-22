@@ -1,47 +1,50 @@
 ﻿param (
     [ValidateSet("Prod", "Dev")]
     [string]
-    $environment = "Prod",                                          # Set the environment for the deployment
+    $environment                      = "Prod",                               # Set the environment for the deployment
 
     [ValidateSet("pod")]
     [string]
-    $project     = "pod",                                           # Project name
+    $project                          = "pod",                                # Project name
+
+    [string]
+    $referenceEnvironment             = 'Dev',                                # Name of the reference environment used as a the basis for building the rest
 
     [ValidateSet("True", "False")]
     [string]
-    $debugMode   = "False",                                          # Run in debug mode (what-if) or actually create the objects
+    $debugMode                        = "False",                              # Run in debug mode (what-if) or actually create the objects
 
     #[Parameter(Mandatory=$true)]
     [string]
-    $owner = "andy.melichar@ascentgl.com",                          # For tags, can't be derived, must be entered by user
+    $owner                            = "andy.melichar@ascentgl.com",         # For tags, can't be derived, must be entered by user
 
     #[Parameter(Mandatory=$true)]                                   
     [string]
-    $contact = "andy.melichar@ascentgl.com",                        # For tags, can't be derived, must be entered by user
+    $contact                          = "andy.melichar@ascentgl.com",         # For tags, can't be derived, must be entered by user
                                 
     [string]
-    $department = "SRE",                                            # For tags, can't be derived, must be entered by user
+    $department                       = "SRE",                                # For tags, can't be derived, must be entered by user
 
     [string]
-    $costcenter = "",                                               # For tags, can't be derived, must be entered by user
+    $costcenter                       = "",                                   # For tags, can't be derived, must be entered by user
 
     [string]
-    $createdBy = "SRE",                                             # For tags, can't be derived, must be entered by user
+    $createdBy                        = "SRE",                                # For tags, can't be derived, must be entered by user
 
     [string]
-    $subscriptionName = "Pod-Prod",                                              
+    $subscriptionName                 = "Pod-Prod",                                              
 
     [string]
-    $servicePrincipal = "AzureAutomationPS",
+    $servicePrincipal                 = "AzureAutomationPS",
 
     [string]
-    $logFilePath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\CreateAzureEnvironment.log" -join "\"),
+    $logFilePath                      = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\CreateAzureEnvironment.log" -join "\"),
 
     [string]
-    $keyVaultName = 'sre-dev-keyvault',
+    $keyVaultName                     = 'sre-dev-keyvault',
 
     [string]
-    $scriptPath = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\")
+    $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\")
 )
 
 # This script is designed to roll out an environment
@@ -82,6 +85,7 @@ $separators = @{
     "Service Bus Namespace"    = ""
     "Cosmo DB"                 = "-"
     "Logic App"                = "-"
+    "Azure Subscription"       = '-'
 }
 
 $resourceCommand = @{
@@ -108,7 +112,6 @@ $envMap = @{
         "UAT"  = "u"
 }
 
-# $resource = [ordered]@{}
 $resource = New-Object System.Collections.Generic.Dictionary"[String,String]"
 $resourceList = [System.Collections.ArrayList]@()
 
@@ -120,6 +123,19 @@ $parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Jso
 $azureNameSpaces = [System.Collections.ArrayList]@()
 
 ### Function Definitions ###
+
+function getNameSpaces($baseEnv)
+{
+    # Get the list of resources in the primary Development environment resource group since it is the reference environment
+    # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
+    # The function accepts an environment parameter to identify the reference subscription/resource group.
+
+    $rgName = $envMap[$baseEnv],$project,$resourceTypes["Resource Group"] -join $separators["Resource Group"]
+    Set-AzContext -Subscription [string]($project,$envMap[$baseEnv] -join $separators["Azure Subscription"])
+    (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
+        $null=$azureNameSpaces.Add($_.Split("/")[0])
+    } 
+}
 
 function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [string[]]$keys, [string]$tenantId, [string]$applicationId)
 {
@@ -142,18 +158,6 @@ function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [
 
     Write-Host "Setting subscription to: $subName"
 
-}
-
-function getNameSpaces()
-{
-    # Get the list of resources in the primary Development environment resource group since it is the reference environment
-    # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
-
-    $rgName = $envMap["Dev"],$project,$resourceTypes["Resource Group"] -join $separator
-    Set-AzContext -Subscription $project,$envMap["Dev"] -join $separator
-    (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
-        $null=$azureNameSpaces.Add($_.Split("/")[0])
-    } 
 }
 
 function registerProvider()
@@ -412,13 +416,14 @@ function lockResourceGroup([string] $resourceGroupName)
 
 }
 
-getNameSpaces       # Register any required namespaces to provision resources for this subscription.
+
+#### Testing Section ####
+
+getNameSpaces "Dev"       # Register any required namespaces to provision resources for this subscription.
 
 Connect-AzAccount   # this is login with my account first before switching to the service prinicipal
 
 registerProvider    # This registers the list of resources from the Dev subscription project resource group in this subscription.
-
-#### Testing Section ####
 
 exit 0
 
