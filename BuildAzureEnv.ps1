@@ -145,7 +145,19 @@ function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [
 
 function registerProvider()
 {
-    Register-AzResourceProvider -ProviderNamespace "Microsoft.Cdn"
+    # Get the list of resources in the primary Development environment resource group since it is the reference environment
+    # This depends on the service principal being granted contributor rights to the accompanying DEV subscription
+
+    $resourceList = [System.Collections.ArrayList]@()
+    $rgName = $envMap["Dev"],$project,$resourceTypes["Resource Group"] -join $separator
+    Set-AzContext -Subscription $project,$envMap["Dev"] -join $separator
+    (Get-AzResource -ResourceGroupName $rgName).ResourceType | ForEach-Object {
+        $null=$resourceList.Add($_.Split("/")[0])
+    } 
+
+    $r = $resourceList | Sort-Object | Get-Unique
+    $r | ForEach-Object { Register-AzResourceProvider -ProviderNamespace $_ }
+
 }
 
 function createLogEntry([string] $logEntry, [string]$logFilePath, [string]$entryType)
