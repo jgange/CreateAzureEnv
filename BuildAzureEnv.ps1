@@ -424,15 +424,11 @@ function lockResourceGroup([string] $resourceGroupName)
 
 #### Testing Section ####
 
+#### Main Program ####
+
 getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
 
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
-
-registerProvider                          # This registers the list of resources from the Dev subscription project resource group in this subscription.
-
-exit 0
-
-#### Main Program ####
 
 if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }
 
@@ -448,6 +444,8 @@ $tenantId = '7797ca53-b03e-4a03-baf0-13628aa79c92'
 $applicationId = "0702023c-176d-46e8-81bc-5e79e7de57cd"
 
 connectToAzure "Pod-Prod" $keyVaultName $servicePrincipal ("AES-Key","AzureAutomationPowerShellEncryptedPassword") $tenantId $applicationId
+
+registerProvider                          # This registers the list of resources from the Dev subscription project resource group in this subscription.
 
 # Populate the hash table 
 
