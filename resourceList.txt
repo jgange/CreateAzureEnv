@@ -1,2 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=App Config,Location=eastus,sku=standard
+Type=Service Bus Namespace,Location=eastus,SkuName=Standard

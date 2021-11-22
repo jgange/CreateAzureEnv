@@ -445,7 +445,7 @@ $applicationId = "0702023c-176d-46e8-81bc-5e79e7de57cd"
 
 connectToAzure "Pod-Prod" $keyVaultName $servicePrincipal ("AES-Key","AzureAutomationPowerShellEncryptedPassword") $tenantId $applicationId
 
-registerProvider                          # This registers the list of resources from the Dev subscription project resource group in this subscription.
+registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
 
 # Populate the hash table 
 
