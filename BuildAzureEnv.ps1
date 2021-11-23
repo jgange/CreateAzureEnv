@@ -68,7 +68,7 @@ $resourceTypes = @{
     "Container Registry"       = "acr"
     "Storage Account"          = "sa"
     "Service Bus Namespace"    = "sb"
-    "Cosmos DB"                 = "cos"
+    "Cosmos DB"                = "cos"
     "Logic App"                = "lapp"
 }
 
@@ -324,9 +324,9 @@ function createAzureDeployment($config)
 function assignTags([string]$resourceId, [string]$type, [string]$location)
 {
     
-    $resourceId
-    $type
-    $location
+    #$resourceId
+    #$type
+    #$location
 
     if ($resourceId.Length -le 1) { Stop-Transcript; Exit 0 }
 
@@ -429,7 +429,7 @@ getNameSpaces $referenceEnvironment       # Register any required namespaces to 
 
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
-if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }
+if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }   # Keep a log if debug if off
 
 $env       = $envMap[$environment]                                                       # Environment
 $filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"  
@@ -447,6 +447,8 @@ connectToAzure "Pod-Prod" $keyVaultName $servicePrincipal ("AES-Key","AzureAutom
 registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
 
 # Populate the hash table 
+
+exit 0
 
 $resourceList | ForEach-Object {
 
