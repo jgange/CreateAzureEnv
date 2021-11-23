@@ -1,3 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=App Service Plan,Location=eastus,Tier=Standard,NumberofWorkers=1,WorkerSize=Small,PerSiteScaling=$False
-Type=Logic App,Location=eastus,State=Enabled
+Type=Storage Account,Location=eastus,SkuName=Standard_LRS,MinimumTlsVersion=TLS1_2,Kind=Storage,EnableHttpsTrafficOnly=$True,AllowBlobPublicAccess=$True
