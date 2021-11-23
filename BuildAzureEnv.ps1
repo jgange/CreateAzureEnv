@@ -492,9 +492,19 @@ $resourceList | ForEach-Object {
 
     if ($resource.Values -contains 'Dependent Resource')
     {
+        # Iterate through the resource object and save the key which is paired with the Value = Dependent Resource
+        # Then compose the resource name and verify it exists before updating the value
         Write-Host 'Handle dependent resources.'
         Stop-Transcript
         exit 0
+
+        $resource.Keys | ForEach-Object {
+            if ($resource[$_] -eq 'Dependent Resource') { $k = $_ }
+        }
+        $resourceReference = $envMap[$environment],$project,$resourceTypes[$k] -join $separators[$resourceTypes[$k]]
+        $resource[$k] = $resourceReference
+
+        $resource
 
     }
 
