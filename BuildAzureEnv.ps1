@@ -446,12 +446,12 @@ connectToAzure "Pod-Prod" $keyVaultName $servicePrincipal ("AES-Key","AzureAutom
 
 registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
 
-# Populate the hash table 
-
-exit 0
+# Populate the hash table which contains the components of the command to execute
 
 $resourceList | ForEach-Object {
 
+    Write-Host "Record read: $($_)"
+    
     # The first object is always the resource group. For every subsequent resource, resource group must be added to the hash table
     # Create a temporary hashtable to capture the settings from the file - need to account for the case when the value is null
     
