@@ -500,12 +500,15 @@ $resourceList | ForEach-Object {
             if ($resource[$_] -eq 'Dependent Resource') { $k = $_ }
         }
 
-
-
+        $k
         $resourceReference = $envMap[$environment],$project,$resourceTypes[$k] -join $separators[$k]
         $resource[$k] = $resourceReference
 
         $resource
+
+        Stop-Transcript
+
+        exit 0
 
     }
 
