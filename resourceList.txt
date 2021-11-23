@@ -1,3 +1,3 @@
 Type=Resource Group,Location=eastus
-Type=App Service Plan,Location=eastus,Tier=Standard,NumberofWorkers=1,WorkerSize=Small,PerSiteScaling=$False
-Type=Logic App,Location=eastus,State=Enabled,App Service Plan=Dependent Resource
+Type=AppServicePlan,Location=eastus,Tier=Standard,NumberofWorkers=1,WorkerSize=Small,PerSiteScaling=$False
+Type=Logic App,Location=eastus,State=Enabled,AppServicePlan=Dependent Resource
