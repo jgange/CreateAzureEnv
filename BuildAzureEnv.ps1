@@ -499,7 +499,10 @@ $resourceList | ForEach-Object {
         $resource.Keys | ForEach-Object {
             if ($resource[$_] -eq 'Dependent Resource') { $k = $_ }
         }
-        $resourceReference = $envMap[$environment],$project,$resourceTypes[$k] -join $separators[$resourceTypes[$k]]
+
+
+
+        $resourceReference = $envMap[$environment],$project,$resourceTypes[$k] -join $separators[$k]
         $resource[$k] = $resourceReference
 
         $resource
