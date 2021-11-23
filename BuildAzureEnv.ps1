@@ -241,8 +241,9 @@ function provisionResource($config)
     if ($debugMode -eq 'True') {
         $resource.Add("Id","Bogus")
     }
-    else { 
-        $resource.Add("Id",$r.ResourceId)
+    else {                                                                 # Add the resource Id which could be Id or ResourceId
+        if (r$.ResourceId) { $resource.Add("Id",$r.ResourceId) }
+        else { $resource.Add("Id",$r.Id) }
     }
     Write-Host "Creation of resource $name completed successfully."
 }
@@ -324,11 +325,14 @@ function createAzureDeployment($config)
 function assignTags([string]$resourceId, [string]$type, [string]$location)
 {
     
-    #$resourceId
+    Write-Host "Getting ready to tag Resource with Id $resourceId"
     #$type
     #$location
 
-    if ($resourceId.Length -le 1) { Stop-Transcript; Exit 0 }
+    if ($resourceId.Length -le 1) { 
+        Write-Host "Resource ID is null, exiting script."
+        Stop-Transcript; Exit 0
+    }
 
     # get resource type from calling get-AzResource
     $tags   = @{
