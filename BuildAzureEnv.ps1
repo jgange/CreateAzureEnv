@@ -462,6 +462,7 @@ $resourceList | ForEach-Object {
     $resource.Add("Command",$resourceCommand[$tempHash["Type"]])
     $resource.Add("Name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]]))
 
+    # Add resource group name if the resource is not a resource group
     if ($tempHash["Type"] -ne "Resource Group")
     {
         $resource.Add("ResourceGroupName",$resourceGroupName)                                                         # Pass the resource group name parameter if the resource type is not a resource group
@@ -479,12 +480,30 @@ $resourceList | ForEach-Object {
         $resource.Add($_,$tempHash[$_])
     }
 
+    # Handle any dependent resources (e.g., App Service Plan for Logic App)
+
+    if ($resource.Values -contains 'Dependent Resource')
+    {
+        Write-Host 'Handle dependent resources.'
+        Stop-Transcript
+        exit 0
+
+    }
+
+    # Enable test mode if the debug flag is set
+
     if ($debugMode -eq "True")
     {
         $resource.Add("WhatIf","")
     }
 
+
+    # Add error handling behavior
+
     $resource.Add("ErrorAction","Stop")                                                                                # Add error trapping
+
+    
+    # Handle deployments - required if the PowerShell commands do not fully implement the resource options
 
     if ($resource.Type -eq "Azure Deployment")
     {
@@ -498,6 +517,9 @@ $resourceList | ForEach-Object {
     $resource
     Write-Host "Resource Id"
     $resource["Id"]
+
+
+    # After resource creation, assign the appropriate tags
 
     assignTags $resource["Id"] $resourceType $resource["Location"]
    
