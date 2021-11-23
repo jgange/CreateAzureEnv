@@ -495,8 +495,6 @@ $resourceList | ForEach-Object {
         # Iterate through the resource object and save the key which is paired with the Value = Dependent Resource
         # Then compose the resource name and verify it exists before updating the value
         Write-Host 'Handle dependent resources.'
-        Stop-Transcript
-        exit 0
 
         $resource.Keys | ForEach-Object {
             if ($resource[$_] -eq 'Dependent Resource') { $k = $_ }
