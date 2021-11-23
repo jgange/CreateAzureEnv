@@ -505,11 +505,6 @@ $resourceList | ForEach-Object {
         $resource[$k] = $resourceReference
 
         $resource
-
-        Stop-Transcript
-
-        exit 0
-
     }
 
     # Enable test mode if the debug flag is set
