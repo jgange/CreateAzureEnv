@@ -242,7 +242,7 @@ function provisionResource($config)
         $resource.Add("Id","Bogus")
     }
     else {                                                                 # Add the resource Id which could be Id or ResourceId
-        if (r$.ResourceId) { $resource.Add("Id",$r.ResourceId) }
+        if ($r.ResourceId) { $resource.Add("Id",$r.ResourceId) }
         else { $resource.Add("Id",$r.Id) }
     }
     Write-Host "Creation of resource $name completed successfully."
