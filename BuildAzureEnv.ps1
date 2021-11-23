@@ -168,7 +168,9 @@ function registerProvider()
     # I should add error handling to this to manage that exception case.
 
     $r = $azureNameSpaces | Sort-Object | Get-Unique
-    $r | ForEach-Object { Register-AzResourceProvider -ProviderNamespace $_ }
+    $r | ForEach-Object { 
+        Register-AzResourceProvider -ProviderNamespace $_ | Out-Null
+    }
 }
 
 function createLogEntry([string] $logEntry, [string]$logFilePath, [string]$entryType)
@@ -514,9 +516,9 @@ $resourceList | ForEach-Object {
         provisionResource $resource
     }
 
-    $resource
-    Write-Host "Resource Id"
-    $resource["Id"]
+    # $resource
+    # Write-Host "Resource Id"
+    # $resource["Id"]
 
 
     # After resource creation, assign the appropriate tags
