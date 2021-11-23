@@ -63,7 +63,7 @@ $resourceTypes = @{
     "Log analytics workspace"  = "law"
     "Application Insights"     = "ai"
     "Azure Kubernetes Service" = "aks"
-    "AppServicePlan"         = "asp"
+    "App Service Plan"         = "asp"
     "Key Vault"                = "kv"
     "Container Registry"       = "acr"
     "Storage Account"          = "sa"
@@ -78,7 +78,7 @@ $separators = @{
     "Log analytics workspace"  = "-"
     "Application Insights"     = "-"
     "Azure Kubernetes Service" = "-"
-    "AppServicePlan"         = "-"
+    "App Service Plan"         = "-"
     "Logic App"                = "-"
     "Key Vault"                = "-"
     "Container Registry"       = "-"
@@ -94,7 +94,7 @@ $resourceCommand = @{
     "Log analytics workspace"  = "New-AzOperationalInsightsWorkspace"
     "Application Insights"     = "New-AzApplicationInsights"
     "Azure Kubernetes Service" = "New-AzAksCluster"
-    "AppServicePlan"           = "New-AzAppServicePlan"
+    "App Service Plan"           = "New-AzAppServicePlan"
     "Logic App"                = 'New-AzLogicApp'
     "Key Vault"                = "New-AzKeyVault"
     "Container Registry"       = "New-AzContainerRegistry"
@@ -227,6 +227,8 @@ function provisionResource($config)
         {
             Write-Host "An error occurred during resource creation."                      
             $Error
+            Stop-Transcript
+            exit 1
         }
 
     # Go into a while loop while resource is created. This is necessary because of dependencies on certain resources. Skip this if debug is enabled
