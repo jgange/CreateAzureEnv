@@ -1,6 +1,7 @@
 Type=Resource Group,Location=eastus
 Type=Log analytics workspace,Location=eastus
 Type=Key Vault,Location=eastus,SoftDeleteRetentionInDays=90
+Type=Storage Account,Location=eastus,SkuName=Standard_LRS,MinimumTlsVersion=TLS1_2,Kind=Storage,EnableHttpsTrafficOnly=$True,AllowBlobPublicAccess=$True
 Type=App Config,Location=eastus,sku=standard
 Type=App Service Plan,Location=eastus,Tier=Standard,NumberofWorkers=1,WorkerSize=Small,PerSiteScaling=$False
 Type=Service Bus Namespace,Location=eastus,SkuName=Standard

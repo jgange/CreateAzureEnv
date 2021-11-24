@@ -1,2 +1,2 @@
 Type=Resource Group,Location=eastus
-Type=Storage Account,Location=eastus,SkuName=Standard_LRS,MinimumTlsVersion=TLS1_2,Kind=Storage,EnableHttpsTrafficOnly=$True,AllowBlobPublicAccess=$True
+Type=Log analytics workspace,Location=eastus
