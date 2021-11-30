@@ -12,7 +12,7 @@
 
     [ValidateSet("True", "False")]
     [string]
-    $debugMode                        = "False",                              # Run in debug mode (what-if) or actually create the objects
+    $debugMode                        = "True",                              # Run in debug mode (what-if) or actually create the objects
 
     #[Parameter(Mandatory=$true)]
     [string]
@@ -214,7 +214,7 @@ function provisionResource($config)
         $value = $config[$key]
         
         if ($key.ToLower() -eq 'command') { $segment = $value + " " }
-        elseif ($value -ne "") { $segment = + $separator + $key + " " + $value + " " }
+        elseif ($value -ne "") { $segment = $separator + $key + " " + $value + " " }
         elseif ($value -eq "") { $segment = $separator + $key + " " }
 
         $commandString = $commandString + $segment
