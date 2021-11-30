@@ -519,14 +519,12 @@ $resourceList | ForEach-Object {
 
     if ($debugMode -eq "True")
     {
-        $resource.Add("WhatIf","")
+        if ($resource["language"] -eq 'CLI') { $resource.Add("--what-if","") }
+        else { $resource.Add("WhatIf","") }
     }
 
-
     # Add error handling behavior
-
-    $resource.Add("ErrorAction","Stop")                                                                                # Add error trapping
-
+    if ($resource.Keys -notcontains 'language') {$resource.Add("ErrorAction","Stop")}                                                                             # Add error trapping
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
 
@@ -538,11 +536,6 @@ $resourceList | ForEach-Object {
     {
         provisionResource $resource
     }
-
-    # $resource
-    # Write-Host "Resource Id"
-    # $resource["Id"]
-
 
     # After resource creation, assign the appropriate tags
 
