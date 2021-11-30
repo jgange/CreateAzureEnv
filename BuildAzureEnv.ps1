@@ -196,7 +196,7 @@ function provisionResource($config)
 {
     $commandString = ''
 
-    if ($config["language"] -eq 'CLI'){
+    if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators and then remove the key
         $separator = '--'
         $config.Remove("Language")
     }
