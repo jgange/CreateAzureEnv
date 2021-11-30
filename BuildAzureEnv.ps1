@@ -477,7 +477,7 @@ $resourceList | ForEach-Object {
 
     $resource.Add("Command",$resourceCommand[$tempHash["Type"]])
 
-    if ($resource["language"] -eq "CLI") {
+    if ($tempHash["language"] -eq "CLI") {
         $resource.Add("name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]]))
     }
     else { $resource.Add("Name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]])) }
@@ -485,8 +485,8 @@ $resourceList | ForEach-Object {
     # Add resource group name if the resource is not a resource group
     if ($tempHash["Type"] -ne "Resource Group")
     {
-        if ($resource["language"] -eq "CLI") {
-            $resource.Add("resource-group",$resourceGroupName)
+        if ($tempHash["language"] -eq "CLI") {
+             $resource.Add("resource-group",$resourceGroupName)
         }
         else { $resource.Add("ResourceGroupName",$resourceGroupName) }                                                  # Pass the resource group name parameter if the resource type is not a resource group
         
@@ -543,8 +543,6 @@ $resourceList | ForEach-Object {
     {
         provisionResource $resource
     }
-
-    exit 0
 
     # After resource creation, assign the appropriate tags
 

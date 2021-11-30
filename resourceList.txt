@@ -1,1 +1,2 @@
+Type=Resource Group,Location=eastus
 Type=Azure Kubernetes Service,language=CLI,location=eastus2,network-plugin=azure,enable-managed-identity=azure,enable-addons=ingress=appgw,appgw-name=appgatewayname,appgw-subnet-cidr="10.2.0.0/16",generate-ssh-keys,attach-acr=acr-resourceId
