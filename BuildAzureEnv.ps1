@@ -476,12 +476,19 @@ $resourceList | ForEach-Object {
     # Get the name and creation command
 
     $resource.Add("Command",$resourceCommand[$tempHash["Type"]])
-    $resource.Add("Name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]]))
+
+    if ($resource["language"] -eq 'CLI') {
+        $resource.Add("name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]]))
+    }
+    else { $resource.Add("Name",($env, $project, $resourceTypes[$tempHash["Type"]] -join $separators[$tempHash["Type"]])) }
 
     # Add resource group name if the resource is not a resource group
     if ($tempHash["Type"] -ne "Resource Group")
     {
-        $resource.Add("ResourceGroupName",$resourceGroupName)                                                         # Pass the resource group name parameter if the resource type is not a resource group
+        if ($resource["language"] -eq 'CLI') {
+            $resource.Add("resource-group",$resourceGroupName)
+        }
+        else { $resource.Add("ResourceGroupName",$resourceGroupName) }                                                  # Pass the resource group name parameter if the resource type is not a resource group
         
     }
     else
@@ -519,7 +526,7 @@ $resourceList | ForEach-Object {
 
     if ($debugMode -eq "True")
     {
-        if ($resource["language"] -eq 'CLI') { $resource.Add("--what-if","") }
+        if ($resource["language"] -eq 'CLI') { $resource.Add("what-if","") }
         else { $resource.Add("WhatIf","") }
     }
 
