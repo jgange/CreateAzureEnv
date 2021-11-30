@@ -58,7 +58,7 @@
 # The Az Module also needs to be present
 
 $resourceTypes = @{
-    "Resource Group"           = "rg"
+    "Resource Group"           = "rg"                                         # This is the list of abbreviations used to identify the resource type in Azure
     "App Config"               = "ac"
     "Log analytics workspace"  = "law"
     "Application Insights"     = "ai"
@@ -72,7 +72,7 @@ $resourceTypes = @{
     "Logic App"                = "lapp"
 }
 
-$separators = @{
+$separators = @{                                                               # These are separator characters used for the naming convention
     "Resource Group"           = "-"
     "App Config"               = "-"
     "Log analytics workspace"  = "-"
@@ -93,9 +93,9 @@ $resourceCommand = @{
     "App Config"               = "New-AzAppConfigurationStore"
     "Log analytics workspace"  = "New-AzOperationalInsightsWorkspace"
     "Application Insights"     = "New-AzApplicationInsights"
-    "Azure Kubernetes Service" = "New-AzAksCluster"
-    "App Service Plan"           = "New-AzAppServicePlan"
-    "Logic App"                = 'New-AzLogicApp'
+    "Azure Kubernetes Service" = "az aks create"                               # This requires the Azure CLI b/c the app gateway ingress controller is not supported
+    "App Service Plan"         = "New-AzAppServicePlan"
+    "Logic App"                = "New-AzLogicApp"
     "Key Vault"                = "New-AzKeyVault"
     "Container Registry"       = "New-AzContainerRegistry"
     "Storage Account"          = "New-AzStorageAccount"
@@ -105,7 +105,7 @@ $resourceCommand = @{
 }
 
 
-$envMap = @{
+$envMap = @{                                                                   # This translates the environment name to the appropriate prefix
         "Prod" = "p"
         "Dev"  = "d"
         "QA"   = "q"
@@ -196,6 +196,12 @@ function provisionResource($config)
 {
     $commandString = ''
 
+    if ($config["language"] -eq 'CLI'){
+        $separator = '--'
+        $config.Remove("Language")
+    }
+    else { $separator =  '-'}
+
     # identify the Id field, it can change with object type
 
     [string]$type = $config["Type"]
@@ -208,8 +214,8 @@ function provisionResource($config)
         $value = $config[$key]
         
         if ($key.ToLower() -eq 'command') { $segment = $value + " " }
-        elseif ($value -ne "") { $segment = "-" + $key + " " + $value + " " }
-        elseif ($value -eq "") { $segment = "-" + $key + " " }
+        elseif ($value -ne "") { $segment = + $separator + $key + " " + $value + " " }
+        elseif ($value -eq "") { $segment = $separator + $key + " " }
 
         $commandString = $commandString + $segment
     }
