@@ -208,7 +208,8 @@ function provisionResource($config)
     # identify the Id field, it can change with object type
 
     [string]$type = $config["Type"]
-    [string]$name = $config["Name"]
+    if ($config.Values -contains "CLI") { [string]$name = $config["name"] }          # Have to account for CLI using the name instead for a parameter
+    else { [string]$name = $config["Name"] }
 
     $config.Remove("Type")
 
