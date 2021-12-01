@@ -441,6 +441,8 @@ getNameSpaces $referenceEnvironment       # Register any required namespaces to 
 
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
+az login                                  # required to use the CLI
+
 if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }   # Keep a log if debug if off
 
 $env       = $envMap[$environment]                                                       # Environment
