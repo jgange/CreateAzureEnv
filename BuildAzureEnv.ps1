@@ -403,6 +403,7 @@ function cleanUpEnvironment ($resoureGroupName)
 {
     # delete the resource group if the creation of the resources fails somewhere and log this also
     # also needs to delete the tags associated with the resources if required
+    # Also need to remove the Network Watcher resource group if AKS resource is created
 
     try {
         $rg = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
