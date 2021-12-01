@@ -12,7 +12,7 @@
 
     [ValidateSet("True", "False")]
     [string]
-    $debugMode                        = "True",                              # Run in debug mode (what-if) or actually create the objects
+    $debugMode                        = "False",                              # Run in debug mode (what-if) or actually create the objects
 
     #[Parameter(Mandatory=$true)]
     [string]
