@@ -190,6 +190,7 @@ function getResourceMap([string] $filePath)
     else
     {
         Write-Host "File does not exist, check file location."
+        createLogEntry ($filePath,"file does not exit, check file location" -join " ") $logFilePath "Error"
         exit 1
     }
 }
@@ -234,7 +235,7 @@ function provisionResource($config)
     catch
         {
             Write-Host "An error occurred during resource creation."                      
-            $Error
+            createLogEntry $Error $logFilePath "Error"
             Stop-Transcript
             exit 1
         }
@@ -444,11 +445,12 @@ getNameSpaces $referenceEnvironment       # Register any required namespaces to 
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
 az login                                  # required to use the CLI
+az account set --subscription $subscriptionName  # This is going to require some additional code in the connect function to support - this is a SHORTCUT - REPLACE!
 
-if ($debugMode -eq "False") { Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt" }   # Keep a log if debug if off
+Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"                 # Keep a log of the output
 
 $env       = $envMap[$environment]                                                       # Environment
-$filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"  
+$filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"   # Location of the manifest file
 
 # Process the input file with the resource definitions
 
@@ -559,4 +561,4 @@ $resourceList | ForEach-Object {
 
 Write-Host "Completed run."
 
-if ($debugMode -eq "False") { Stop-Transcript }
+Stop-Transcript
