@@ -526,7 +526,7 @@ $resourceList | ForEach-Object {
 
     if ($debugMode -eq "True")
     {
-        if ($resource["language"] -eq 'CLI') { #do nothing b/c there is no equivalent statement in Azure CLI }
+        if ($resource["language"] -eq 'CLI') {}  #do nothing b/c there is no equivalent statement in Azure CLI
         else { $resource.Add("WhatIf","") }
     }
 
