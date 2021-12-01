@@ -1,3 +1,3 @@
 Type=Resource Group,Location=eastus
 Type=Container Registry,Location=eastus,Sku=Premium,EnableAdminUser
-Type=Azure Kubernetes Service,language=CLI,location=eastus2,network-plugin=azure,service-principal=0702023c-176d-46e8-81bc-5e79e7de57cd,client-secret=4Mo7Q~-gR1v_onYIf_FI0h9SSjeO-pe5KEv3W,enable-addons=ingress=appgw,appgw-name=appgatewayname,appgw-subnet-cidr="10.2.0.0/16",generate-ssh-keys,attach-acr=p-pod-acr
+Type=Azure Kubernetes Service,language=CLI,location=eastus2,network-plugin=azure,service-principal=0702023c-176d-46e8-81bc-5e79e7de57cd,client-secret=4Mo7Q~-gR1v_onYIf_FI0h9SSjeO-pe5KEv3W,enable-addons=ingress=appgw,appgw-name=appgatewayname,appgw-subnet-cidr="10.2.0.0/16",generate-ssh-keys,attach-acr=ppodacr
