@@ -158,6 +158,8 @@ function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [
     $subId = (Get-AzSubscription -SubscriptionName $subName).Id                         # Get the Subscription Id from the name
     $null = Set-AzContext -Subscription $subId                                         # Set the subscription context to create the resources
 
+    if ($resourceList -contains 'CLI') { az account set --subscription $subId}
+
     Write-Host "Setting subscription to: $subName"
 
 }
