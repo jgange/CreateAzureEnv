@@ -199,18 +199,20 @@ function provisionResource($config)
 {
     $commandString = ''
 
-    if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators and then remove the key
+    # combine these two statements for the CLI changes
+    if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators
         $separator = '--'
-        $config.Remove("language")
+        [string]$name = $config["name"]
+        $config.Remove("language") 
     }
-    else { $separator =  '-'}
+    else { 
+        $separator =  '-'
+        [string]$name = $config["Name"]
+    }
 
     # identify the Id field, it can change with object type
 
     [string]$type = $config["Type"]
-    if ($config.Values -contains "CLI") { [string]$name = $config["name"] }          # Have to account for CLI using the name instead for a parameter
-    else { [string]$name = $config["Name"] }
-
     $config.Remove("Type")
 
     $config.Keys | ForEach-Object {
