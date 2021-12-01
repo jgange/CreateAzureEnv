@@ -198,7 +198,7 @@ function provisionResource($config)
 
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators and then remove the key
         $separator = '--'
-        $config.Remove("Language")
+        $config.Remove("language")
     }
     else { $separator =  '-'}
 
@@ -526,7 +526,7 @@ $resourceList | ForEach-Object {
 
     if ($debugMode -eq "True")
     {
-        if ($resource["language"] -eq 'CLI') { $resource.Add("what-if","") }
+        if ($resource["language"] -eq 'CLI') { #do nothing b/c there is no equivalent statement in Azure CLI }
         else { $resource.Add("WhatIf","") }
     }
 
