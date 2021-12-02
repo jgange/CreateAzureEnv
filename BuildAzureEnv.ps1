@@ -203,6 +203,7 @@ function provisionResource($config)
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators
         $separator = '--'
         [string]$name = $config["name"]
+        $language = $config["language"]
         $config.Remove("language") 
     }
     else { 
@@ -252,13 +253,21 @@ function provisionResource($config)
         } while ($status -ne 'Succeeded')
     }
     
+    if ($language) { 
+        $r = Get-AzResource -Name $name
+        $r
+    }  # This is necessary b/c the output from the az cli is in json and hard to decode
+
     if ($debugMode -eq 'True') {
         $resource.Add("Id","Bogus")
     }
     else {                                                                 # Add the resource Id which could be Id or ResourceId
-        if ($r.ResourceId) { $resource.Add("Id",$r.ResourceId) }
+        if ($r.ResourceId) { $resource.Add("Id",$r.ResourceId) }           # Need to do a get resource if the lang type was CLI, which means saving the lang type before removing it
         else { $resource.Add("Id",$r.Id) }
     }
+
+
+
     Write-Host "Creation of resource $name completed successfully."
 }
 
