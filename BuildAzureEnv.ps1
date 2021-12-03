@@ -44,7 +44,10 @@
     $keyVaultName                     = 'sre-dev-keyvault',
 
     [string]
-    $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\")
+    $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\"),
+
+    [string]
+    $paramSeparator                  = '*'
 )
 
 # This script is designed to roll out an environment
@@ -70,6 +73,8 @@ $resourceTypes = @{
     "Service Bus Namespace"    = "sb"
     "Cosmos DB"                = "cos"
     "Logic App"                = "lapp"
+    "Application gateway"      = "ag"
+    "Service principal"        = "sp"
 }
 
 $separators = @{                                                               # These are separator characters used for the naming convention
@@ -86,6 +91,8 @@ $separators = @{                                                               #
     "Service Bus Namespace"    = ""
     "Cosmo DB"                 = "-"
     "Azure Subscription"       = '-'
+    "Application gateway"      = "-"
+    "Service principal"        = "-"
 }
 
 $resourceCommand = @{
@@ -102,6 +109,8 @@ $resourceCommand = @{
     "Service Bus Namespace"    = "New-AzServiceBusNamespace"
     "Cosmos DB"                = "New-AzCosmosDBAccount"
     "Azure Deployment"         = "New-AzResourceGroupDeployment"
+    "Application gateway"      = ""
+    "Service principal"        = "New-AzADServicePrincipal"
 }
 
 
@@ -488,9 +497,9 @@ $resourceList | ForEach-Object {
     
     $tempHash = @{}
 
-    $_.split(",") | ForEach-Object {
+    $_.split($paramSeparator) | ForEach-Object {
         $kv =$_.split("=")
-        $tempHash.Add($kv[0],$kv[1])
+        $tempHash.Add($kv[0],$kv[1]) 
     }
     # Get the name and creation command
 
@@ -553,6 +562,10 @@ $resourceList | ForEach-Object {
     if ($resource.Keys -notcontains 'language') {$resource.Add("ErrorAction","Stop")}                                                                             # Add error trapping
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
+
+    $resource
+
+    exit 0
 
     if ($resource.Type -eq "Azure Deployment")
     {
