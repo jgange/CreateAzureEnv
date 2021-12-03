@@ -418,7 +418,7 @@ function cleanUpEnvironment ($resoureGroupName)
 
     try {
         $rg = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
-        $aksClusterName = $envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-"
+        $aksClusterName = $envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-"   # This is not required - it gets deleted when the aks resource is removed, but the NetworkWatcherGroup needs to be deleted
         $aksGroupName = "MC", $resoureGroupName,$aksClusterName, $rg.Location -join "_"
 
         $aksClusterName
@@ -439,7 +439,7 @@ function cleanUpEnvironment ($resoureGroupName)
 function lockResourceGroup([string] $resourceGroupName)
 {
     try {
-        New-AzResourceLock -LockName Lock-RG -LockLevel CanNotDelete -ResourceGroupName RG-CLI -Force -ErrorAction Stop
+        New-AzResourceLock -LockName Lock-RG -LockLevel CanNotDelete -ResourceGroupName RG-CLI -Force -ErrorAction Stop      #Need to cycle through the resources b/c some might get added which we don't want to lock
     }
     catch
     {
