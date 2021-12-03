@@ -238,6 +238,8 @@ function provisionResource($config)
 
     $commandString
 
+    exit 0;Stop-Transcript
+
     try {           
             Write-Host "Attempting to create resource: $($config["Name"])"
             $r = Invoke-Expression $commandString
@@ -562,10 +564,6 @@ $resourceList | ForEach-Object {
     if ($resource.Keys -notcontains 'language') {$resource.Add("ErrorAction","Stop")}                                                                             # Add error trapping
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
-
-    $resource
-
-    exit 0
 
     if ($resource.Type -eq "Azure Deployment")
     {
