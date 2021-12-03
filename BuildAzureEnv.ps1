@@ -209,7 +209,7 @@ function provisionResource($config)
     $commandString = ''
 
     # combine these two statements for the CLI changes
-    if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators
+    if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
         [string]$name = $config["name"]
         $language = $config["language"]
@@ -220,15 +220,28 @@ function provisionResource($config)
         [string]$name = $config["Name"]
     }
 
-    # identify the Id field, it can change with object type
-
     [string]$type = $config["Type"]
     $config.Remove("Type")
+
+    # Now identify any values with dashes in them. For those, it means we have to fill in the references from other resources.
 
     $config.Keys | ForEach-Object {
         $key = $_
         $value = $config[$key]
         
+        $value
+        if ($value.contains("_"))                                                       # If the resource doesn't exist, and we just need to supply a name, use New as the property
+        {
+            $resourceRef   = $value.Split("_")
+            $resourceRef
+			$resourceCmd   = $resourceCommand[$resourceRef[0]].Replace("New-","Get-")
+			$resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join "-")
+			$commandString = "(" + ($resourceCmd,"-name",$resourceName -join " ") + " -ResourceGroupName " + (($envmap[$environment],$project,$resourceTypes["Resource Group"] -join "-")) + ")." + $resourceRef[1]
+            $commandString
+			#$rRef          = Invoke-Expression $commandString
+
+        }
+
         if ($key.ToLower() -eq 'command') { $segment = $value + " " }
         elseif ($value -ne "") { $segment = $separator + $key + " " + $value + " " }
         elseif ($value -eq "") { $segment = $separator + $key + " " }
@@ -238,7 +251,7 @@ function provisionResource($config)
 
     $commandString
 
-    exit 0;Stop-Transcript
+    Stop-Transcript;exit 0
 
     try {           
             Write-Host "Attempting to create resource: $($config["Name"])"
