@@ -1,1 +1,4 @@
+Type=Resource Group,Location=eastus
+Type=Log analytics workspace,Location=eastus
+Type=Container Registry,Location=eastus,Sku=Premium,EnableAdminUser
 Type=Azure Kubernetes Service*language=CLI*location=eastus2*network-plugin=azure*service-principal=Service principal_ApplicationId*client-secret=Service principal_Password*enable-addons=ingress-appgw,monitoring*appgw-name=Application gateway_New*appgw-subnet-cidr="10.2.0.0/16"*generate-ssh-keys*attach-acr=Container Registry_Name*workspace-resource-id=Log analytics workspace_ResourceId
