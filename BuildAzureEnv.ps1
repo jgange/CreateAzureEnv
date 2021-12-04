@@ -208,6 +208,8 @@ function provisionResource($config)
 {
     $commandString = ''
 
+    $config
+
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
         [string]$name = $config["name"]
@@ -253,8 +255,6 @@ function provisionResource($config)
     }
 
     $commandString
-
-    Stop-Transcript;exit 0
 
     try {           
             Write-Host "Attempting to create resource: $($config["Name"])"
