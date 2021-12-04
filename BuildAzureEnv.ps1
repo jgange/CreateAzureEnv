@@ -208,7 +208,6 @@ function provisionResource($config)
 {
     $commandString = ''
 
-    # combine these two statements for the CLI changes
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
         [string]$name = $config["name"]
@@ -223,23 +222,27 @@ function provisionResource($config)
     [string]$type = $config["Type"]
     $config.Remove("Type")
 
-    # Now identify any values with dashes in them. For those, it means we have to fill in the references from other resources.
+    # Now identify any values with underscores in them. For those, it means we have to fill in the references from other resources.
 
     $config.Keys | ForEach-Object {
         $key = $_
         $value = $config[$key]
         
-        $value
-        if ($value.contains("_"))                                                       # If the resource doesn't exist, and we just need to supply a name, use New as the property
+        if ($value.contains("_"))                                                       
         {
             $resourceRef   = $value.Split("_")
-            $resourceRef
-			$resourceCmd   = $resourceCommand[$resourceRef[0]].Replace("New-","Get-")
-			$resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join "-")
-			$commandString = "(" + ($resourceCmd,"-name",$resourceName -join " ") + " -ResourceGroupName " + (($envmap[$environment],$project,$resourceTypes["Resource Group"] -join "-")) + ")." + $resourceRef[1]
-            $commandString
-			#$rRef          = Invoke-Expression $commandString
-
+            if ($resourceRef[1] -eq "New") {                                            # Deal with the use case where the object doesn't exist and just needs a name
+                $resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join $separators[$resourceRef[0]])
+                $value = $resourceName
+            }
+            elseif ($resourceRef[1] -eq 'ApplicationId') { $value = $servicePrincipal } 
+            elseif ($resourceRef[1] -eq 'Password') { $value = '"{0}"' -f (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "AzureAutomationPowerShellSecret" -AsPlainText) }
+            else {
+			    $resourceCmd   = $resourceCommand[$resourceRef[0]].Replace("New-","Get-")
+			    $resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join $separators[$resourceRef[0]])
+			    $derivedValue  = "(" + ($resourceCmd,"-name",$resourceName -join " ") + " -ResourceGroupName " + (($envmap[$environment],$project,$resourceTypes["Resource Group"] -join "-")) + ")." + $resourceRef[1]
+			    $value         = '"{0}"' -f (Invoke-Expression $derivedValue)
+            }
         }
 
         if ($key.ToLower() -eq 'command') { $segment = $value + " " }
