@@ -44,6 +44,9 @@
     $keyVaultName                     = 'sre-dev-keyvault',
 
     [string]
+    $secretName                       = 'PODProductionDeployAutomationSecret',
+
+    [string]
     $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\"),
 
     [string]
@@ -148,26 +151,20 @@ function getNameSpaces($baseEnv)
     } 
 }
 
-function connectToAzure([string]$subName, [string] $keyVaultName, [string]$sp, [string[]]$keys, [string]$tenantId, [string]$applicationId)
+function connectToAzure([string]$subName, [string]$keyVaultName, [string]$sp, [string]$secretName, [string]$tenantId, [string]$applicationId)
 {
-    $secrets = @{}
-    $key = [System.Collections.ArrayList]@()
-    $keys | ForEach-Object {
-        $secretText = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $_ -AsPlainText                            # Put this in a hash with the secret name and the value and pass it to the function
-        $secrets.Add($_,$secretText)
-    }
+    $secret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretName -AsPlainText                            # Put this in a hash with the secret name and the value and pass it to the function
 
-    [byte[]] $AESKey = $secrets["AES-Key"].Split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)   # Cast this as a byte array so it can be used to decrypt the password - the key must be in the form a byte array
-
-    $passwordFile = $secrets["AzureAutomationPowerShellEncryptedPassword"]
-
-    $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $applicationId, ($passwordFile | ConvertTo-SecureString -Key $AESKey)
+    $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $applicationId, ($secret | ConvertTo-SecureString)
     $azc = Connect-AzAccount -ServicePrincipal -Credential $pscredential -Tenant $tenantId
 
-    $subId = (Get-AzSubscription -SubscriptionName $subName).Id                         # Get the Subscription Id from the name
-    $null = Set-AzContext -Subscription $subId                                         # Set the subscription context to create the resources
+    $subId = (Get-AzSubscription -SubscriptionName $subName).Id                                                    # Get the Subscription Id from the name
+    $null = Set-AzContext -Subscription $subId                                                                     # Set the subscription context to create the resources
 
-    if ($resourceList -contains 'CLI') { az account set --subscription $subId}
+	if ($resourceList -contains 'CLI') {                                                                           # Set the subscription context for the CLI if there are commands using it
+        az login --service-principal -u $sp -p $secret --tenant $tenantId
+        az account set --subscription $subId
+    }                                     
 
     Write-Host "Setting subscription to: $subName"
 
@@ -208,7 +205,7 @@ function provisionResource($config)
 {
     $commandString = ''
 
-    $config
+    #$config
 
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
@@ -484,7 +481,8 @@ getNameSpaces $referenceEnvironment       # Register any required namespaces to 
 
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
-az login                                  # required to use the CLI
+az login                                  # required to use the CLI, also with my account
+
 az account set --subscription $subscriptionName  # This is going to require some additional code in the connect function to support - this is a SHORTCUT - REPLACE!
 
 Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"                 # Keep a log of the output
@@ -498,9 +496,14 @@ getResourceMap $filePath
 
 # Connect to the appropriate subscription
 $tenantId = '7797ca53-b03e-4a03-baf0-13628aa79c92'
-$applicationId = "0702023c-176d-46e8-81bc-5e79e7de57cd"
 
-connectToAzure "Pod-Prod" $keyVaultName $servicePrincipal ("AES-Key","AzureAutomationPowerShellEncryptedPassword") $tenantId $applicationId
+$applicationId = (Get-AzADServicePrincipal -DisplayName $servicePrincipal).ApplicationId      # Get the App Id based on the SP display name
+
+#$applicationId = "0702023c-176d-46e8-81bc-5e79e7de57cd"            # change this to a get statement based on the servicePrincipal variable
+
+connectToAzure $subscriptionName $keyVaultName $servicePrincipal $secretName $tenantId $applicationId
+
+exit 0
 
 registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
 
