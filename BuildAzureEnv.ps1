@@ -35,7 +35,7 @@
     $subscriptionName                 = "Pod-Prod",                                              
 
     [string]
-    $servicePrincipal                 = "AzureAutomationPS",
+    $servicePrincipal                 = "PODProductionDeployAutomation",
 
     [string]
     $logFilePath                      = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv\CreateAzureEnvironment.log" -join "\"),
@@ -155,14 +155,17 @@ function connectToAzure([string]$subName, [string]$keyVaultName, [string]$sp, [s
 {
     $secret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretName -AsPlainText                            # Put this in a hash with the secret name and the value and pass it to the function
 
-    $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $applicationId, ($secret | ConvertTo-SecureString)
-    $azc = Connect-AzAccount -ServicePrincipal -Credential $pscredential -Tenant $tenantId
+    [securestring]$secStringPassword = ConvertTo-SecureString $secret -AsPlainText -Force
+    # $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $applicationId, (ConvertTo-SecureString $secret -AsPlainText -Force)
+    [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($applicationId, $secStringPassword)
+
+    $azc = Connect-AzAccount -ServicePrincipal -Credential $credObject -Tenant $tenantId
 
     $subId = (Get-AzSubscription -SubscriptionName $subName).Id                                                    # Get the Subscription Id from the name
     $null = Set-AzContext -Subscription $subId                                                                     # Set the subscription context to create the resources
 
 	if ($resourceList -contains 'CLI') {                                                                           # Set the subscription context for the CLI if there are commands using it
-        az login --service-principal -u $sp -p $secret --tenant $tenantId
+        az login --service-principal -u $sp -p $secret --tenant $tenantId --output none
         az account set --subscription $subId
     }                                     
 
@@ -477,13 +480,11 @@ function lockResourceGroup([string] $resourceGroupName)
 
 #### Main Program ####
 
-getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
-
 Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
 
 az login                                  # required to use the CLI, also with my account
 
-az account set --subscription $subscriptionName  # This is going to require some additional code in the connect function to support - this is a SHORTCUT - REPLACE!
+getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
 
 Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"                 # Keep a log of the output
 
@@ -496,16 +497,14 @@ getResourceMap $filePath
 
 # Connect to the appropriate subscription
 $tenantId = '7797ca53-b03e-4a03-baf0-13628aa79c92'
-
 $applicationId = (Get-AzADServicePrincipal -DisplayName $servicePrincipal).ApplicationId      # Get the App Id based on the SP display name
-
-#$applicationId = "0702023c-176d-46e8-81bc-5e79e7de57cd"            # change this to a get statement based on the servicePrincipal variable
 
 connectToAzure $subscriptionName $keyVaultName $servicePrincipal $secretName $tenantId $applicationId
 
-exit 0
-
 registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
+
+Stop-Transcript
+exit 0
 
 # Populate the hash table which contains the components of the command to execute
 
