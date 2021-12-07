@@ -503,9 +503,6 @@ connectToAzure $subscriptionName $keyVaultName $servicePrincipal $secretName $te
 
 registerProvider                          # This registers the list of resources from the Dev subscription project resource group in the target subscription.
 
-Stop-Transcript
-exit 0
-
 # Populate the hash table which contains the components of the command to execute
 
 $resourceList | ForEach-Object {
@@ -533,6 +530,7 @@ $resourceList | ForEach-Object {
     # Add resource group name if the resource is not a resource group
     if ($tempHash["Type"] -ne "Resource Group")
     {
+        $resourceGroupName = ($env, $project, $resourceTypes["Resource Group"] -join $separators["Resource Group"])
         if ($tempHash["language"] -eq "CLI") {
              $resource.Add("resource-group",$resourceGroupName)
         }
