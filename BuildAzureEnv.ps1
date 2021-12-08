@@ -267,6 +267,7 @@ function provisionResource($config)
         {
             Write-Host "An error occurred during resource creation."                      
             createLogEntry $Error $logFilePath "Error"
+            $Error[0]
             Stop-Transcript
             exit 1
         }
