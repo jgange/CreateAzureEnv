@@ -208,7 +208,7 @@ function provisionResource($config)
 {
     $commandString = ''
 
-    #$config
+    $config
 
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
