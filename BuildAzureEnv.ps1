@@ -213,7 +213,7 @@ function provisionResource($config)
     if ($config["language"] -eq 'CLI'){                            # If there is a language key = CLI, use the CLI separators for parameters
         $separator = '--'
         [string]$name = $config["name"]
-        $language = $config["language"]
+        $language = $config["language"]                            # Need to do a get resource if the lang type was CLI, which means saving the lang type before removing it
         $config.Remove("language") 
     }
     else { 
@@ -290,7 +290,7 @@ function provisionResource($config)
         $resource.Add("Id","Bogus")
     }
     else {                                                                 # Add the resource Id which could be Id or ResourceId
-        if ($r.ResourceId) { $resource.Add("Id",$r.ResourceId) }           # Need to do a get resource if the lang type was CLI, which means saving the lang type before removing it
+        if ($r.ResourceId) { $resource.Add("Id",$r.ResourceId) }           
         else { $resource.Add("Id",$r.Id) }
     }
 
@@ -577,7 +577,7 @@ $resourceList | ForEach-Object {
         else { $resource.Add("WhatIf","") }
     }
 
-    # Add error handling behavior
+    # Add error handling behavior for powershell commands - Azure CLI does not have an equivalent
     if ($resource.Keys -notcontains 'language') {$resource.Add("ErrorAction","Stop")}                                                                             # Add error trapping
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
