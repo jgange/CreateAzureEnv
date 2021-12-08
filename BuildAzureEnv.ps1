@@ -164,8 +164,8 @@ function connectToAzure([string]$subName, [string]$keyVaultName, [string]$sp, [s
     $subId = (Get-AzSubscription -SubscriptionName $subName).Id                                                    # Get the Subscription Id from the name
     $null = Set-AzContext -Subscription $subId                                                                     # Set the subscription context to create the resources
 
-	if ($resourceList -contains 'CLI') {                                                                           # Set the subscription context for the CLI if there are commands using it
-        az login --service-principal -u $sp -p $secret --tenant $tenantId --output none
+	if ($resourceList -match 'CLI') {                                                                           # Set the subscription context for the CLI if there are commands using it
+        az login --service-principal -u $applicationId -p $secret --tenant $tenantId
         az account set --subscription $subId
     }                                     
 
@@ -237,8 +237,8 @@ function provisionResource($config)
                 $resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join $separators[$resourceRef[0]])
                 $value = $resourceName
             }
-            elseif ($resourceRef[1] -eq 'ApplicationId') { $value = $servicePrincipal } 
-            elseif ($resourceRef[1] -eq 'Password') { $value = '"{0}"' -f (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "AzureAutomationPowerShellSecret" -AsPlainText) }
+            elseif ($resourceRef[1] -eq 'ApplicationId') { $value = (Get-AzADServicePrincipal -DisplayName $servicePrincipal).ApplicationId } 
+            elseif ($resourceRef[1] -eq 'Password') { $value = '"{0}"' -f (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretName -AsPlainText) }
             else {
 			    $resourceCmd   = $resourceCommand[$resourceRef[0]].Replace("New-","Get-")
 			    $resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join $separators[$resourceRef[0]])
