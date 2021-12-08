@@ -230,9 +230,9 @@ function provisionResource($config)
         $key = $_
         $value = $config[$key]
         
-        if ($value.contains("_"))                                                       
+        if ($value.contains("&"))                                                       # This is the separator for derived values                                                
         {
-            $resourceRef   = $value.Split("_")
+            $resourceRef   = $value.Split("&")
             if ($resourceRef[1] -eq "New") {                                            # Deal with the use case where the object doesn't exist and just needs a name
                 $resourceName  = ($envmap[$environment],$project,$resourceTypes[$resourceRef[0]] -join $separators[$resourceRef[0]])
                 $value = $resourceName
