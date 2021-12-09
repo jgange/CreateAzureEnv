@@ -509,7 +509,7 @@ Connect-AzAccount                         # this is login with my account first 
 
 az login                                  # required to use the CLI, also with my account
 
-# Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"  # This suppresses the breaking change warnings
+Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"  # This suppresses the breaking change warnings
 
 getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
 
@@ -578,8 +578,11 @@ $resourceList | ForEach-Object {
         else { $resource.Add("WhatIf","") }
     }
 
-    # Add error handling behavior for powershell commands - Azure CLI does not have an equivalent
-    if ($resource.Keys -notcontains 'language') {$resource.Add("ErrorAction","Stop")}                                                                             # Add error trapping
+    # Add error handling behavior for powershell commands and overwrite existing resources. The Azure CLI does not have an equivalent.
+    if ($resource.Keys -notcontains 'language') {
+        $resource.Add("ErrorAction","Stop")                                # Stop the script on any terminal error
+        $resource.Add("Force","")                                       # Overwrite any existing resource
+    }                                                                          
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
 
