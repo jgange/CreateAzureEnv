@@ -468,25 +468,29 @@ function cleanUpEnvironment ($resoureGroupName)
 
 function lockResource($resource)
 {
-    $resourceLock = [PSCustomObject]@{
+    $resource
+    
+    $resourceLock = [ordered]@{
         LockName          = "Lock",$resource["Name"] -join "-"
         LockLevel         = 'CanNotDelete'
         ResourceName      = $resource["Name"]
-        ResourceGroupName = $resource["ResourceGroupName"]
-        ResourceType      = (Get-AzResource -Name $resource["Name"] -ResourceGroupName $resource["ResourceGroupName"]).ResourceType
         Force             = $true
         ErrorAction       = 'Stop'
     }
     
-    if ($resource["Type"] -eq "Resource Group") { $resourceLock.ResourceGroupName = $resource["Name"] }
-    
+    if (!($resource["ResourceGroupName"])) {
+        $resourceLock.Add("ResourceGroupName",$resource["Name"])
+        $resourceLock.Remove("ResourceName")
+    }
+    else {
+        $resourceLock.Add("ResourceGroupName",$resource["ResourceGroupName"])
+        $resourceLock.Add("ResourceType",(Get-AzResource -Name $resource["Name"] -ResourceGroupName $resource["ResourceGroupName"]).ResourceType)          # Get the resource type
+    }   
+
     $resourceLock
-    Stop-Transcript
-    exit 0
 
     try {
         New-AzResourceLock @resourceLock
-        # New-AzResourceLock -LockName "Lock-RG",$resourceGroupName -join "-" -LockLevel CanNotDelete -ResourceGroupName $resourceGroupName -Force -ErrorAction Stop      #Need to cycle through the resources b/c some might get added which we don't want to lock
     }
     catch
     {
@@ -590,14 +594,14 @@ $resourceList | ForEach-Object {
     }
     else { assignTags $resource["Id"] $resourceType $resource["Location"] }
    
+    lockResource $resource
+
     $tempHash.Clear()                                                                  # Clear the table to be ready for the next resource
     $resource.Clear()                                                                  # Clear the table to be ready for the next resource
 
 }
 
 # Finally, apply non-deletion locks to the resource objects inside the designated resource group
-
-lockResource $resource
 
 Write-Host "Completed run."
 
