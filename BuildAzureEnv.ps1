@@ -495,6 +495,7 @@ function lockResource($resource)
     catch
     {
         Write-Host "Failed to lock resource"
+        processError
     }
 
 }
@@ -595,6 +596,12 @@ $resourceList | ForEach-Object {
     else { assignTags $resource["Id"] $resourceType $resource["Location"] }
    
     lockResource $resource
+
+    if ($resourceList -contains 'Azure Kubernetes Service')
+    {
+        # stub to add tags and locks to Network Watcher RG
+    }
+    
 
     $tempHash.Clear()                                                                  # Clear the table to be ready for the next resource
     $resource.Clear()                                                                  # Clear the table to be ready for the next resource
