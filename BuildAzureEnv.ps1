@@ -382,7 +382,9 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
 
     if ($resourceId.Length -le 1) { 
         Write-Host "Resource ID is null, exiting script."
-        Stop-Transcript; Exit 0
+        # create a log entry
+        Stop-Transcript; Exit 1
+
     }
 
     # get resource type from calling get-AzResource
@@ -593,7 +595,10 @@ $resourceList | ForEach-Object {
 
     # After resource creation, assign the appropriate tags
 
-    assignTags $resource["Id"] $resourceType $resource["Location"]
+    if ($resource["language"] -eq 'CLI') {                                             # Adjust for the Azure CLI location switch (uses lowercase)
+        assignTags $resource["Id"] $resourceType $resource["location"]
+    }
+    else { assignTags $resource["Id"] $resourceType $resource["Location"] }
    
     $tempHash.Clear()                                                                  # Clear the table to be ready for the next resource
     $resource.Clear()                                                                  # Clear the table to be ready for the next resource
