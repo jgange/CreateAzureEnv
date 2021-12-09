@@ -184,6 +184,14 @@ function registerProvider()
     }
 }
 
+function processError()
+{
+    $errorEntry = ("Exception: " + $Error[0].Exception),("Category Info: " + $Error[0].CategoryInfo),("Fully Qualified Error ID: " + $Error[0].FullyQualifiedErrorId) -join "\`n`n"
+    createLogEntry $errorEntry $logFilePath "Error"
+    Stop-Transcript
+    Exit 1
+}
+
 function createLogEntry([string] $logEntry, [string]$logFilePath, [string]$entryType)
 {
     (Get-Date -Format "MM/dd/yyyy HH:mm K"),$entryType,$logEntry -join "**" | Out-File $logFilePath -Append
@@ -266,10 +274,7 @@ function provisionResource($config)
     catch
         {
             Write-Host "An error occurred during resource creation."                      
-            createLogEntry $Error $logFilePath "Error"
-            $Error[0]
-            Stop-Transcript
-            exit 1
+            processError
         }
 
     # Go into a while loop while resource is created. This is necessary because of dependencies on certain resources. Skip this if debug is enabled
@@ -355,10 +360,7 @@ function createAzureDeployment($config)
     catch
         {
             Write-Host "An error occurred during resource creation."                      
-            $Error[0].CategoryInfo
-            $Error[0].ErrorDetails
-            Stop-Transcript
-            exit 1
+            processError
         }
 
     if ($debugMode -eq 'True') {
@@ -409,7 +411,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
         }
         catch {
             Write-Host "Failed to created tags. $tags"
-            $Error
+            processError
         }
     }
     else
@@ -422,8 +424,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
         catch
         {
             Write-Host "Failed to look up resource."
-            $Error
-            exit 1
+            processError
         }
 
         # Try to add tags to it
@@ -433,8 +434,7 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
         }
         catch {
             Write-Host "Failed to add tags to resource."
-            $Error
-            exit 1
+            processError
         }
     }
 
@@ -466,10 +466,27 @@ function cleanUpEnvironment ($resoureGroupName)
 
 }
 
-function lockResourceGroup([string] $resourceGroupName)
+function lockResource($resource)
 {
+    $resourceLock = [PSCustomObject]@{
+        LockName          = "Lock",$resource["Name"] -join "-"
+        LockLevel         = 'CanNotDelete'
+        ResourceName      = $resource["Name"]
+        ResourceGroupName = $resource["ResourceGroupName"]
+        ResourceType      = (Get-AzResource -Name $resource["Name"] -ResourceGroupName $resource["ResourceGroupName"]).ResourceType
+        Force             = $true
+        ErrorAction       = 'Stop'
+    }
+    
+    if ($resource["Type"] -eq "Resource Group") { $resourceLock.ResourceGroupName = $resource["Name"] }
+    
+    $resourceLock
+    Stop-Transcript
+    exit 0
+
     try {
-        New-AzResourceLock -LockName Lock-RG -LockLevel CanNotDelete -ResourceGroupName RG-CLI -Force -ErrorAction Stop      #Need to cycle through the resources b/c some might get added which we don't want to lock
+        New-AzResourceLock @resourceLock
+        # New-AzResourceLock -LockName "Lock-RG",$resourceGroupName -join "-" -LockLevel CanNotDelete -ResourceGroupName $resourceGroupName -Force -ErrorAction Stop      #Need to cycle through the resources b/c some might get added which we don't want to lock
     }
     catch
     {
@@ -487,20 +504,20 @@ Connect-AzAccount                         # this is login with my account first 
 
 az login                                  # required to use the CLI, also with my account
 
+# Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"  # This suppresses the breaking change warnings
+
 getNameSpaces $referenceEnvironment       # Register any required namespaces to provision resources for this subscription.
 
 Start-Transcript -Path "c:\users\jgange\Projects\PowerShell\CreateAzureEnv\CreateAzureEnv_RunLog.txt"                 # Keep a log of the output
 
 $env       = $envMap[$environment]                                                       # Environment
-$filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"   # Location of the manifest file
+$filePath  = $env:USERPROFILE + "\Projects\PowerShell\CreateAzureEnv\resourceList.txt"   # Location of the resource manifest file - github repo?
 
-# Process the input file with the resource definitions
-
-getResourceMap $filePath
+getResourceMap $filePath                                                                 # Process the input file with the resource definitions
 
 # Connect to the appropriate subscription
 $tenantId = '7797ca53-b03e-4a03-baf0-13628aa79c92'
-$applicationId = (Get-AzADServicePrincipal -DisplayName $servicePrincipal).ApplicationId      # Get the App Id based on the SP display name
+$applicationId = (Get-AzADServicePrincipal -DisplayName $servicePrincipal).ApplicationId      # Get the App Id based on the Service Principal display name
 
 connectToAzure $subscriptionName $keyVaultName $servicePrincipal $secretName $tenantId $applicationId
 
@@ -541,9 +558,7 @@ $resourceList | ForEach-Object {
         
     }
     else
-    {
-        $resourceGroupName = $resource["Name"]   
-    }
+    { $resourceGroupName = $resource["Name"] }
 
     $resourceType = $tempHash["Type"]                                                                                  # Save this value because it will be removed so we can iterate easily
 
@@ -552,30 +567,9 @@ $resourceList | ForEach-Object {
         $resource.Add($_,$tempHash[$_])
     }
 
-    # Handle any dependent resources (e.g., App Service Plan for Logic App)
-
-    if ($resource.Values -contains 'Dependent Resource')
+    if ($debugMode -eq "True")                   # Enable test mode if the debug flag is set
     {
-        # Iterate through the resource object and save the key which is paired with the Value = Dependent Resource
-        # Then compose the resource name and verify it exists before updating the value
-        Write-Host 'Handle dependent resources.'
-
-        $resource.Keys | ForEach-Object {
-            if ($resource[$_] -eq 'Dependent Resource') { $k = $_ }
-        }
-
-        $k
-        $resourceReference = $envMap[$environment],$project,$resourceTypes[$k] -join $separators[$k]
-        $resource[$k] = $resourceReference
-
-        $resource
-    }
-
-    # Enable test mode if the debug flag is set
-
-    if ($debugMode -eq "True")
-    {
-        if ($resource["language"] -eq 'CLI') {}  #do nothing b/c there is no equivalent statement in Azure CLI
+        if ($resource["language"] -eq 'CLI') {}  # Do nothing b/c there is no equivalent statement in Azure CLI
         else { $resource.Add("WhatIf","") }
     }
 
@@ -585,13 +579,9 @@ $resourceList | ForEach-Object {
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
 
     if ($resource.Type -eq "Azure Deployment")
-    {
-        createAzureDeployment $resource
-    }
+        { createAzureDeployment $resource }
     else 
-    {
-        provisionResource $resource
-    }
+        { provisionResource $resource }
 
     # After resource creation, assign the appropriate tags
 
@@ -604,6 +594,10 @@ $resourceList | ForEach-Object {
     $resource.Clear()                                                                  # Clear the table to be ready for the next resource
 
 }
+
+# Finally, apply non-deletion locks to the resource objects inside the designated resource group
+
+lockResource $resource
 
 Write-Host "Completed run."
 
