@@ -186,7 +186,7 @@ function registerProvider()
 
 function processError()
 {
-    $errorEntry = ("Exception: " + $Error[0].Exception),("Category Info: " + $Error[0].CategoryInfo),("Fully Qualified Error ID: " + $Error[0].FullyQualifiedErrorId) -join "\`n`n"
+    $errorEntry = ("Exception: " + $Error[0].Exception), ("Category Info: " + ("Location: " + $Error[0].InvocationInfo.PositionMessage), $Error[0].CategoryInfo), ("Fully Qualified Error ID: " + $Error[0].FullyQualifiedErrorId) -join "\`n`n"
     createLogEntry $errorEntry $logFilePath "Error"
     Stop-Transcript
     Exit 1
@@ -230,6 +230,29 @@ function provisionResource($config)
     }
 
     [string]$type = $config["Type"]
+
+    # Handle case where resource already exists by skipping the provisioning step
+    if ($type -eq 'Resource Group') {
+        $Id = (Get-AzResourceGroup -Name $name -ErrorAction Ignore).ResourceId
+        If ($Id) { 
+            Write-Host "Resource group $name already exists, skipping provisioning step."
+            createLogEntry "Resource group $($name) already exists, skipping provisioning step." $logFilePath "Warning"
+            if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
+            else { $resource.Add("Id",$Id) }                                                            # Add the resource Id which could be Id or ResourceId
+            Return
+        }
+    }
+    else {
+        $Id = (Get-AzResource -Name $name -ResourceGroupName $config["ResourceGroupName"] -ErrorAction Ignore).ResourceId
+        if ($Id) {
+        Write-Host "Resource $name already exists, skipping provisioning step."
+        createLogEntry "Resource $($name) already exists, skipping provisioning step." $logFilePath "Warning"
+        if ($debugMode -eq 'True') { $resource.Add("Id","Bogus") }
+        else { $resource.Add("Id",$Id) }                                                            # Add the resource Id which could be Id or ResourceId
+        Return
+        }
+    }
+
     $config.Remove("Type")
 
     # Now identify any values with underscores in them. For those, it means we have to fill in the references from other resources.
@@ -310,6 +333,7 @@ function createAzureDeployment($config)
     [string]$deploymentName = ("Deploy",$config["ResourceType"], (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_").Replace(" ","-")
     
     $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
+    # The workspaceResourceId should be a Try/Catch since it might not exist or be accessible
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
@@ -329,8 +353,8 @@ function createAzureDeployment($config)
     $parameterFile | ConvertTo-Json | Out-file $templateParameterFilePath -Force
 
     $config["Name"] = $deploymentName                                                      # change the calculated name value to the deployment name value. It is incorrect since this is a deployment.
-    $resourceType   = $config["ResourceType"]                                                # capture the resource type so we can retrieve the resourceId once the resource has been created
-    $name           = $config["Name"]
+    $resourceType   = $config["ResourceType"]                                              # capture the resource type so we can retrieve the resourceId once the resource has been created
+    $name           = $parameterFile.parameters.name
 
     $commandString  = ''
 
@@ -369,6 +393,8 @@ function createAzureDeployment($config)
     else { 
         $resource.Add("Id",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).ResourceId)
         $resource.Add("Location",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).Location)    # This is required b/c we don't get this from the resource list file for a deployment
+        $Resource.Name = $name
+        $resource.Add("ResourceType",$resourceType)
     }
     Write-Host "Creation of resource $name completed successfully."
 
@@ -572,16 +598,15 @@ $resourceList | ForEach-Object {
         $resource.Add($_,$tempHash[$_])
     }
 
-    if ($debugMode -eq "True")                   # Enable test mode if the debug flag is set
+    if ($debugMode -eq "True")                                                                                         # Enable test mode if the debug flag is set
     {
-        if ($resource["language"] -eq 'CLI') {}  # Do nothing b/c there is no equivalent statement in Azure CLI
+        if ($resource["language"] -eq 'CLI') {}                                                                        # Do nothing b/c there is no equivalent statement in Azure CLI
         else { $resource.Add("WhatIf","") }
     }
 
-    # Add error handling behavior for powershell commands and overwrite existing resources. The Azure CLI does not have an equivalent.
+    # Add error handling behavior for powershell commands. The Azure CLI does not have an equivalent.
     if ($resource.Keys -notcontains 'language') {
-        $resource.Add("ErrorAction","Stop")                                # Stop the script on any terminal error
-        $resource.Add("Force","")                                       # Overwrite any existing resource
+        $resource.Add("ErrorAction","Stop")                                                                            # Stop the script on any terminal error
     }                                                                          
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
