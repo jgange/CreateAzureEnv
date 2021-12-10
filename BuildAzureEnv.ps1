@@ -470,33 +470,6 @@ function assignTags([string]$resourceId, [string]$type, [string]$location)
     }
 
 }
-
-function cleanUpEnvironment ($resoureGroupName)
-{
-    # delete the resource group if the creation of the resources fails somewhere and log this also
-    # also needs to delete the tags associated with the resources if required
-    # Also need to remove the Network Watcher resource group if AKS resource is created
-
-    try {
-        $rg = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
-        $aksClusterName = $envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-"   # This is not required - it gets deleted when the aks resource is removed, but the NetworkWatcherGroup needs to be deleted
-        $aksGroupName = "MC", $resoureGroupName,$aksClusterName, $rg.Location -join "_"
-
-        $aksClusterName
-        $aksGroupName
-
-        exit 0
-
-        Remove-AzResourceGroup -Name $resoureGroupName -Force -ErrorAction SilentlyContinue
-        Remove-AzResourceGroup -Name $aksGroupName -Force -ErrorAction SilentlyContinue
-    }
-    catch {
-        Write-Host "Failed to remove resource group $resoureGroupName."
-        $Error
-    }
-
-}
-
 function lockResource($resource)
 {
      
