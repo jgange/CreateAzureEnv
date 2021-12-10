@@ -159,7 +159,7 @@ function connectToAzure([string]$subName, [string]$keyVaultName, [string]$sp, [s
     # $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $applicationId, (ConvertTo-SecureString $secret -AsPlainText -Force)
     [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($applicationId, $secStringPassword)
 
-    $azc = Connect-AzAccount -ServicePrincipal -Credential $credObject -Tenant $tenantId
+    $null = Connect-AzAccount -ServicePrincipal -Credential $credObject -Tenant $tenantId                          # Use $null to suppress output
 
     $subId = (Get-AzSubscription -SubscriptionName $subName).Id                                                    # Get the Subscription Id from the name
     $null = Set-AzContext -Subscription $subId                                                                     # Set the subscription context to create the resources
@@ -499,8 +499,7 @@ function cleanUpEnvironment ($resoureGroupName)
 
 function lockResource($resource)
 {
-    $resource
-    
+     
     $resourceLock = [ordered]@{
         LockName          = "Lock",$resource["Name"] -join "-"
         LockLevel         = 'CanNotDelete'
@@ -552,7 +551,7 @@ function lockResource($resource)
 
 #### Main Program ####
 
-Connect-AzAccount                         # this is login with my account first before switching to the service prinicipal
+Connect-AzAccount -WarningAction Ignore   # this is login with my account first before switching to the service prinicipal
 
 az login                                  # required to use the CLI, also with my account
 
