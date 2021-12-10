@@ -243,7 +243,11 @@ function provisionResource($config)
         }
     }
     else {
-        $Id = (Get-AzResource -Name $name -ResourceGroupName $config["ResourceGroupName"] -ErrorAction Ignore).ResourceId
+        if ($config["language"] -eq 'CLI') {                                                             # If using the CLI, pass the proper parameter name
+            $Id = (Get-AzResource -Name $name -ResourceGroupName $config["resource-group"] -ErrorAction Ignore).ResourceId
+        }
+        else { $Id = (Get-AzResource -Name $name -ResourceGroupName $config["ResourceGroupName"] -ErrorAction Ignore).ResourceId }
+        
         if ($Id) {
         Write-Host "Resource $name already exists, skipping provisioning step."
         createLogEntry "Resource $($name) already exists, skipping provisioning step." $logFilePath "Warning"
@@ -329,6 +333,7 @@ function provisionResource($config)
 
 function createAzureDeployment($config)
 {
+    # Need to check if the resource already exists
 
     [string]$deploymentName = ("Deploy",$config["ResourceType"], (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_").Replace(" ","-")
     
@@ -354,7 +359,7 @@ function createAzureDeployment($config)
 
     $config["Name"] = $deploymentName                                                      # change the calculated name value to the deployment name value. It is incorrect since this is a deployment.
     $resourceType   = $config["ResourceType"]                                              # capture the resource type so we can retrieve the resourceId once the resource has been created
-    $name           = $parameterFile.parameters.name
+    $name           = $parameterFile.parameters.name.Value
 
     $commandString  = ''
 
@@ -523,6 +528,8 @@ function lockResource($resource)
         Write-Host "Failed to lock resource"
         processError
     }
+
+    $resourceLock.Clear()
 
 }
 
