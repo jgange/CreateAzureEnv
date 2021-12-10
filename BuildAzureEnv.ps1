@@ -243,7 +243,7 @@ function provisionResource($config)
         }
     }
     else {
-        if ($config["language"] -eq 'CLI') {                                                             # If using the CLI, pass the proper parameter name
+        if ($language) {                                                             # If using the CLI, pass the proper parameter name
             $Id = (Get-AzResource -Name $name -ResourceGroupName $config["resource-group"] -ErrorAction Ignore).ResourceId
         }
         else { $Id = (Get-AzResource -Name $name -ResourceGroupName $config["ResourceGroupName"] -ErrorAction Ignore).ResourceId }
@@ -508,15 +508,29 @@ function lockResource($resource)
         Force             = $true
         ErrorAction       = 'Stop'
     }
-    
-    if (!($resource["ResourceGroupName"])) {
-        $resourceLock.Add("ResourceGroupName",$resource["Name"])
-        $resourceLock.Remove("ResourceName")
+
+    if ($resource["Command"] -match "az ") {                                                                                    # Handle the case where the resource was created using the CLI
+        if (!($resource["resource-group"])) {
+            $resourceLock.Add("ResourceGroupName",$resource["name"])
+            $resourceLock.Remove("ResourceName")
+        }
+        else {
+            $resourceLock.Add("ResourceGroupName",$resource["resource-group"])
+            $resourceLock.Add("ResourceType",(Get-AzResource -Name $resource["name"] -ResourceGroupName $resource["resource-group"]).ResourceType)          # Get the resource type
+            $resourceLock["LockName"] = "Lock",$resource["name"] -join "-"
+            $resourceLock["ResourceName"] = $resource["name"]
+        }   
     }
-    else {
-        $resourceLock.Add("ResourceGroupName",$resource["ResourceGroupName"])
-        $resourceLock.Add("ResourceType",(Get-AzResource -Name $resource["Name"] -ResourceGroupName $resource["ResourceGroupName"]).ResourceType)          # Get the resource type
-    }   
+   else {                                                                                                                       # If powershell was used, handle that case
+       if (!($resource["ResourceGroupName"])) {
+            $resourceLock.Add("ResourceGroupName",$resource["Name"])
+            $resourceLock.Remove("ResourceName")
+        }
+        else {
+            $resourceLock.Add("ResourceGroupName",$resource["ResourceGroupName"])
+            $resourceLock.Add("ResourceType",(Get-AzResource -Name $resource["Name"] -ResourceGroupName $resource["ResourceGroupName"]).ResourceType)          # Get the resource type
+        }
+    }
 
     $resourceLock
 
@@ -625,7 +639,7 @@ $resourceList | ForEach-Object {
 
     # After resource creation, assign the appropriate tags
 
-    if ($resource["language"] -eq 'CLI') {                                             # Adjust for the Azure CLI location switch (uses lowercase)
+    if ($resource["Command"] -match "az ") {                                             # Adjust for the Azure CLI location switch (uses lowercase)
         assignTags $resource["Id"] $resourceType $resource["location"]
     }
     else { assignTags $resource["Id"] $resourceType $resource["Location"] }
