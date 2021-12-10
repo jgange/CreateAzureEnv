@@ -186,7 +186,7 @@ function registerProvider()
 
 function processError()
 {
-    $errorEntry = ("Exception: " + $Error[0].Exception), ("Category Info: " + ("Location: " + $Error[0].InvocationInfo.PositionMessage), $Error[0].CategoryInfo), ("Fully Qualified Error ID: " + $Error[0].FullyQualifiedErrorId) -join "\`n`n"
+    $errorEntry = ("Exception: " + $Error[0].Exception), ("Category Info: " + $Error[0].CategoryInfo), ("Location: " + $Error[0].InvocationInfo.PositionMessage), ("Fully Qualified Error ID: " + $Error[0].FullyQualifiedErrorId) -join "\`n`n"
     createLogEntry $errorEntry $logFilePath "Error"
     Stop-Transcript
     Exit 1
