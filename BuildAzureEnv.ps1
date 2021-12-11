@@ -519,6 +519,13 @@ function lockResource($resource)
 
 }
 
+function postConfig([boolean]$configComplete)
+{
+    # stub - call this when the resource manifest has been successfully processed and all the created resources are tagged and locked
+    
+
+}
+
 
 #### Testing Section ####
 
