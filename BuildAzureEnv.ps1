@@ -129,11 +129,6 @@ $envMap = @{                                                                   #
 $resource = New-Object System.Collections.Generic.Dictionary"[String,String]"
 $resourceList = [System.Collections.ArrayList]@()
 
-$templateFilePath          = $scriptPath,"ApplicationInsightsTemplate.json" -join "\"                  
-$templateParameterFilePath = $scriptPath, "ApplicationInsightsParameters.json" -join "\"
-
-$parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
-
 $azureNameSpaces = [System.Collections.ArrayList]@()
 
 ### Function Definitions ###
@@ -337,16 +332,19 @@ function createAzureDeployment($config)
 {
     # Need to check if the resource already exists
 
+    $templateFilePath          = $scriptPath,$config["TemplateFile"] -join "\"                  
+    $templateParameterFilePath = $scriptPath, $config["TemplateParameterFile"] -join "\"
+
+    $parameterFile = (get-Content -Path $templateParameterFilePath | ConvertFrom-Json)
+
     [string]$deploymentName = ("Deploy",$config["ResourceType"], (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_").Replace(" ","-")
     
     $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
     # The workspaceResourceId should be a Try/Catch since it might not exist or be accessible
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
     
-    $networkSecurityGroups_aks_agentpool_nsg_name = {
-        $matchValue = "*" + (($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-"), ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-") -join "_") + "*"
-        (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue}
-    }
+    $matchValue = "*" + (($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-"), ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-") -join "_") + "*"
+    $networkSecurityGroups_aks_agentpool_nsg_name = (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue }
 
     $networkSecurityGroups_aks_agentpool_nsg_name
 
