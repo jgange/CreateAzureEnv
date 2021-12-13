@@ -344,9 +344,9 @@ function createAzureDeployment($config)
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
     
     $matchValue = "*" + (($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-"), ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-") -join "_") + "*"
-    $networkSecurityGroups_aks_agentpool_nsg_name = (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue }
+    $aksResourceGroupName = (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue }
 
-    $networkSecurityGroups_aks_agentpool_nsg_name
+    $networkSecurityGroups_aks_agentpool_nsg_name = (Get-AzResource -ResourceType "Microsoft.Network/networkSecurityGroups" -ResourceGroupName $aksResourceGroupName).ResourceName
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
@@ -387,9 +387,6 @@ function createAzureDeployment($config)
     }
 
     $commandString
-
-    Stop-Transcript
-    exit 0
 
     try {           
             Write-Host "Running the deployment: $($config["Name"])"
