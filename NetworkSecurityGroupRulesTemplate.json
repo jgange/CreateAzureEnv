@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "networkSecurityGroups_aks_agentpool_nsg_name": {
+        "name": {
             "defaultValue": "aks-agentpool-nsg",
             "type": "String"
         }
@@ -12,7 +12,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/allow_cloudflare')]",
+            "name": "[concat(parameters('name'), '/allow_cloudflare')]",
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",
@@ -46,7 +46,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/Allow_Kenosha')]",
+            "name": "[concat(parameters('name'), '/Allow_Kenosha')]",
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",
@@ -65,7 +65,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/SRE_HOME')]",
+            "name": "[concat(parameters('name'), '/SRE_HOME')]",
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",

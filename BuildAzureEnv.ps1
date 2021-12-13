@@ -356,8 +356,6 @@ function createAzureDeployment($config)
         if ($value -eq 'empty') {    
             $newValue = (Get-Variable -Name $prop).Value
             $tempHash.Add("Value",$newValue)
-            $newValue
-            $tempHash
             $parameterFile.parameters.$prop = $tempHash
         }
     }
@@ -408,13 +406,15 @@ function createAzureDeployment($config)
     if ($debugMode -eq 'True') {
         $resource.Add("Id","Bogus")
     }
-    else { 
+    else {
         $resource.Add("Id",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).ResourceId)
         $resource.Add("Location",(Get-AzResource -Name $parameterFile.parameters.name.Value -ResourceGroupName $r.ResourceGroupName).Location)    # This is required b/c we don't get this from the resource list file for a deployment
         $Resource.Name = $name
         $resource.Add("ResourceType",$resourceType)
     }
     Write-Host "Creation of resource $name completed successfully."
+
+    $resource
 
 }
 
