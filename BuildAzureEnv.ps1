@@ -50,7 +50,7 @@
     $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\"),
 
     [string]
-    $paramSeparator                  = '*'
+    $paramSeparator                  = '|'
 )
 
 # This script is designed to roll out an environment
