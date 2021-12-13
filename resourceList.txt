@@ -1,1 +1,1 @@
-Type=Azure Deployment|TemplateFile=NetworkSecurityGroupRulesTemplate.json|TemplateParameterFile=NetworkSecurityGroupRulesParameters.json|Mode=Incremental|ResourceType=Network security group rule
+Type=Azure Deployment|TemplateFile=NetworkSecurityGroupRulesTemplate.json|TemplateParameterFile=NetworkSecurityGroupRulesParameters.json|Mode=Incremental|ResourceType=AKS Network security group rule

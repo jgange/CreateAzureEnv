@@ -78,7 +78,7 @@ $resourceTypes = @{
     "Logic App"                     = "lapp"
     "Application gateway"           = "ag"
     "Service principal"             = "sp"
-    "Network security group rule"   = 'nsgr'
+    "AKS Network security group rule"   = 'aks_nsgr'
 }
 
 $separators = @{                                                               # These are separator characters used for the naming convention
@@ -367,6 +367,12 @@ function createAzureDeployment($config)
     $config["Name"] = $deploymentName                                                      # change the calculated name value to the deployment name value. It is incorrect since this is a deployment.
     $resourceType   = $config["ResourceType"]                                              # capture the resource type so we can retrieve the resourceId once the resource has been created
     $name           = $parameterFile.parameters.name.Value
+
+    if ($aksResourceGroupName -and $resourceType -eq 'AKS Network security group rule'){   # Deal with the exception case of the nsg rule inside the AKS Resource Group
+        $config["ResourceGroupName"]  = $aksResourceGroupName
+    } 
+
+    $config
 
     $commandString  = ''
 
