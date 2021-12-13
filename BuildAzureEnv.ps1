@@ -64,20 +64,21 @@
 # The Az Module also needs to be present
 
 $resourceTypes = @{
-    "Resource Group"           = "rg"                                         # This is the list of abbreviations used to identify the resource type in Azure
-    "App Config"               = "ac"
-    "Log analytics workspace"  = "law"
-    "Application Insights"     = "ai"
-    "Azure Kubernetes Service" = "aks"
-    "App Service Plan"         = "asp"
-    "Key Vault"                = "kv"
-    "Container Registry"       = "acr"
-    "Storage Account"          = "sa"
-    "Service Bus Namespace"    = "sb"
-    "Cosmos DB"                = "cos"
-    "Logic App"                = "lapp"
-    "Application gateway"      = "ag"
-    "Service principal"        = "sp"
+    "Resource Group"                = "rg"                                         # This is the list of abbreviations used to identify the resource type in Azure
+    "App Config"                    = "ac"
+    "Log analytics workspace"       = "law"
+    "Application Insights"          = "ai"
+    "Azure Kubernetes Service"      = "aks"
+    "App Service Plan"              = "asp"
+    "Key Vault"                     = "kv"
+    "Container Registry"            = "acr"
+    "Storage Account"               = "sa"
+    "Service Bus Namespace"         = "sb"
+    "Cosmos DB"                     = "cos"
+    "Logic App"                     = "lapp"
+    "Application gateway"           = "ag"
+    "Service principal"             = "sp"
+    "Network security group rule"   = 'nsgr'
 }
 
 $separators = @{                                                               # These are separator characters used for the naming convention
@@ -96,26 +97,27 @@ $separators = @{                                                               #
     "Azure Subscription"       = '-'
     "Application gateway"      = "-"
     "Service principal"        = "-"
+    "Network security group rule" = "-"
 }
 
 $resourceCommand = @{
-    "Resource Group"           = "New-AzResourceGroup"
-    "App Config"               = "New-AzAppConfigurationStore"
-    "Log analytics workspace"  = "New-AzOperationalInsightsWorkspace"
-    "Application Insights"     = "New-AzApplicationInsights"
-    "Azure Kubernetes Service" = "az aks create"                               # This requires the Azure CLI b/c the app gateway ingress controller is not supported
-    "App Service Plan"         = "New-AzAppServicePlan"
-    "Logic App"                = "New-AzLogicApp"
-    "Key Vault"                = "New-AzKeyVault"
-    "Container Registry"       = "New-AzContainerRegistry"
-    "Storage Account"          = "New-AzStorageAccount"
-    "Service Bus Namespace"    = "New-AzServiceBusNamespace"
-    "Cosmos DB"                = "New-AzCosmosDBAccount"
-    "Azure Deployment"         = "New-AzResourceGroupDeployment"
-    "Application gateway"      = ""
-    "Service principal"        = "New-AzADServicePrincipal"
+    "Resource Group"              = "New-AzResourceGroup"
+    "App Config"                  = "New-AzAppConfigurationStore"
+    "Log analytics workspace"     = "New-AzOperationalInsightsWorkspace"
+    "Application Insights"        = "New-AzApplicationInsights"
+    "Azure Kubernetes Service"    = "az aks create"                               # This requires the Azure CLI b/c the app gateway ingress controller is not supported
+    "App Service Plan"            = "New-AzAppServicePlan"
+    "Logic App"                   = "New-AzLogicApp"
+    "Key Vault"                   = "New-AzKeyVault"
+    "Container Registry"          = "New-AzContainerRegistry"
+    "Storage Account"             = "New-AzStorageAccount"
+    "Service Bus Namespace"       = "New-AzServiceBusNamespace"
+    "Cosmos DB"                   = "New-AzCosmosDBAccount"
+    "Azure Deployment"            = "New-AzResourceGroupDeployment"
+    "Application gateway"         = ""
+    "Service principal"           = "New-AzADServicePrincipal"
+    "Network Security Group Rule" = "Add-AzNetworkSecurityRuleConfig"
 }
-
 
 $envMap = @{                                                                   # This translates the environment name to the appropriate prefix
         "Prod" = "p"
@@ -340,7 +342,7 @@ function createAzureDeployment($config)
     $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
     # The workspaceResourceId should be a Try/Catch since it might not exist or be accessible
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
-
+    
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
         $value = $parameterFile.parameters.$($_.Name).value
@@ -522,7 +524,7 @@ function lockResource($resource)
 function postConfig([boolean]$configComplete)
 {
     # stub - call this when the resource manifest has been successfully processed and all the created resources are tagged and locked
-    
+
 
 }
 
