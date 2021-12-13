@@ -13,9 +13,6 @@
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
             "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/allow_cloudflare')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_aks_agentpool_nsg_name'))]"
-            ],
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",
@@ -50,9 +47,6 @@
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
             "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/Allow_Kenosha')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_aks_agentpool_nsg_name'))]"
-            ],
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",
@@ -72,9 +66,6 @@
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
             "name": "[concat(parameters('networkSecurityGroups_aks_agentpool_nsg_name'), '/SRE_HOME')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_aks_agentpool_nsg_name'))]"
-            ],
             "properties": {
                 "protocol": "*",
                 "sourcePortRange": "*",
