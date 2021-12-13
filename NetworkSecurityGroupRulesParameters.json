@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "networkSecurityGroups_aks_agentpool_nsg_name": {
-            "value": "aks-nsg"
+            "value": "empty"
         }
     }
 }

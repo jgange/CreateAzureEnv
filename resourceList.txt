@@ -1,1 +1,1 @@
-Type=Network security group rule|Name=Allow_Kenosha|NetworkSecurityGroup=aks-agentpool-40807517-nsg|Description="Allow all traffic from Kenosha DC"|SourceAddressPrefix="198.102.80.0/23"|Access=Allow|Priority=100|Direction=Inbound
+Type=Azure Deployment|TemplateFile=NetworkSecurityGroupRulesTemplate.json|TemplateParameterFile=NetworkSecurityGroupRulesParameters.json|Mode=Incremental|ResourceType=Network security group rule
