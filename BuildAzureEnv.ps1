@@ -356,7 +356,10 @@ function createAzureDeployment($config)
     $aksResourceGroupName = (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue }
     $networkSecurityGroups_aks_agentpool_nsg_name = (Get-AzResource -ResourceType "Microsoft.Network/networkSecurityGroups" -ResourceGroupName $aksResourceGroupName).ResourceName
 
-    if ($aksResourceGroupName -and $resourceType -eq 'AKS Network security group rule'){   # Deal with the exception case of the nsg rule inside the AKS Resource Group
+    $aksResourceGroupName
+    $networkSecurityGroups_aks_agentpool_nsg_name
+
+    if ($aksResourceGroupName -and $config["ResourceType"] -eq 'AKS Network security group rule'){   # Deal with the exception case of the nsg rule inside the AKS Resource Group
         $config["ResourceGroupName"]  = $aksResourceGroupName
         $name = $networkSecurityGroups_aks_agentpool_nsg_name
     }
@@ -546,10 +549,10 @@ function postConfig([boolean]$configComplete)
 {
     az account set --subscription (Get-AzSubscription -SubscriptionName $subscriptionName).SubscriptionId
     az aks get-credentials --resource-group ($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-") --name ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-")
-    kubectl create namespace $environment
-    kubectl create namespace $secondaryEnvironment
-    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$environment
-    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$secondaryEnvironment
+    kubectl create namespace $environment.ToLower()
+    kubectl create namespace $secondaryEnvironment.ToLower()
+    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$($environment.ToLower())
+    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$($secondaryEnvironment.ToLower())
 }
 
 
