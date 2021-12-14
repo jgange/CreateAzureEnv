@@ -548,7 +548,7 @@ function lockResource($resource)
 function postConfig([boolean]$configComplete)
 {
     az account set --subscription (Get-AzSubscription -SubscriptionName $subscriptionName).SubscriptionId
-    az aks get-credentials --resource-group ($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-") --name ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-")
+    az aks get-credentials --resource-group ($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-") --name ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-") --overwrite-existing
     kubectl create namespace $environment.ToLower()
     kubectl create namespace $secondaryEnvironment.ToLower()
     kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$($environment.ToLower())
