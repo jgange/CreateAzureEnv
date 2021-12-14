@@ -1,7 +1,7 @@
 ﻿param (
-    [ValidateSet("Prod", "Dev")]
+    [ValidateSet("Production", "Dev")]
     [string]
-    $environment                      = "Prod",                               # Set the environment for the deployment
+    $environment                      = "Production",                         # Set the environment for the deployment
 
     [ValidateSet("pod")]
     [string]
@@ -50,7 +50,10 @@
     $scriptPath                       = ($env:USERPROFILE,"Projects\PowerShell\CreateAzureEnv" -join "\"),
 
     [string]
-    $paramSeparator                  = '|'
+    $paramSeparator                  = '|',
+
+    [string]
+    $certName                        = 'peakplatform-io'
 )
 
 # This script is designed to roll out an environment
@@ -120,7 +123,7 @@ $resourceCommand = @{
 }
 
 $envMap = @{                                                                   # This translates the environment name to the appropriate prefix
-        "Prod" = "p"
+        "Production" = "p"
         "Dev"  = "d"
         "QA"   = "q"
         "UAT"  = "u"
@@ -130,6 +133,12 @@ $resource = New-Object System.Collections.Generic.Dictionary"[String,String]"
 $resourceList = [System.Collections.ArrayList]@()
 
 $azureNameSpaces = [System.Collections.ArrayList]@()
+
+switch ($environment) {                                                        # Identify the secondary environment
+    "Production" { $secondaryEnvironment = 'UAT' }
+    "Dev" { $secondaryEnvironment = 'QA'}
+    Default {}
+}
 
 ### Function Definitions ###
 
@@ -534,9 +543,12 @@ function lockResource($resource)
 
 function postConfig([boolean]$configComplete)
 {
-    # stub - call this when the resource manifest has been successfully processed and all the created resources are tagged and locked
-
-
+    az account set --subscription (Get-AzSubscription -SubscriptionName $subscriptionName).SubscriptionId
+    az aks get-credentials --resource-group ($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-") --name ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-")
+    kubectl create namespace $environment
+    kubectl create namespace $secondaryEnvironment
+    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$environment
+    kubectl create secret tls peakplatform --key ($certName,"key" -join ".") --cert ($certName,"crt" -join ".") --namespace=$secondaryEnvironment
 }
 
 
@@ -624,8 +636,10 @@ $resourceList | ForEach-Object {
     
     # Handle deployments - required if the PowerShell commands do not fully implement the resource options
 
-    if ($resource.Type -eq "Azure Deployment")
-        { createAzureDeployment $resource }
+    if ($resource.Type -eq "Azure Deployment") {
+        createAzureDeployment $resource
+        $resourceType = $resource["ResourceType"]
+    }
     else 
         { provisionResource $resource }
 
@@ -636,20 +650,19 @@ $resourceList | ForEach-Object {
     }
     else { assignTags $resource["Id"] $resourceType $resource["Location"] }
    
-    lockResource $resource
+    lockResource $resource                                                               # Finally, apply non-deletion locks to the resource objects inside the designated resource group
 
     if ($resourceList -contains 'Azure Kubernetes Service')
     {
         # stub to add tags and locks to Network Watcher RG
     }
-    
 
     $tempHash.Clear()                                                                  # Clear the table to be ready for the next resource
     $resource.Clear()                                                                  # Clear the table to be ready for the next resource
 
 }
 
-# Finally, apply non-deletion locks to the resource objects inside the designated resource group
+postConfig $true
 
 Write-Host "Completed run."
 
