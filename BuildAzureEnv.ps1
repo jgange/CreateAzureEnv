@@ -348,14 +348,19 @@ function createAzureDeployment($config)
 
     [string]$deploymentName = ("Deploy",$config["ResourceType"], (Get-Date -Format "MM/dd/yyyy_HH_mm_ss") -join "-").Replace("/","_").Replace(" ","-")
     
-    $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]]
     # The workspaceResourceId should be a Try/Catch since it might not exist or be accessible
     $workspaceResourceId = (Get-AzResource -ResourceGroupName $config["ResourceGroupName"] -Name ($env,$project,$resourceTypes["Log analytics workspace"] -join "-")).ResourceId
     
+    # Handle the case where there is an aks cluster resource group as part of the deployment - look up the resource group name and the nsg name
     $matchValue = "*" + (($envMap[$environment],$project,$resourceTypes["Resource Group"] -join "-"), ($envMap[$environment],$project,$resourceTypes["Azure Kubernetes Service"] -join "-") -join "_") + "*"
     $aksResourceGroupName = (Get-AzResourceGroup).ResourceGroupName | Where-Object { $_ -like $matchValue }
-
     $networkSecurityGroups_aks_agentpool_nsg_name = (Get-AzResource -ResourceType "Microsoft.Network/networkSecurityGroups" -ResourceGroupName $aksResourceGroupName).ResourceName
+
+    if ($aksResourceGroupName -and $resourceType -eq 'AKS Network security group rule'){   # Deal with the exception case of the nsg rule inside the AKS Resource Group
+        $config["ResourceGroupName"]  = $aksResourceGroupName
+        $name = $networkSecurityGroups_aks_agentpool_nsg_name
+    }
+    else { $name = $env, $project, $resourceTypes[$config["ResourceType"]] -join $separators[$config["ResourceType"]] }
 
     $parameterFile.parameters | get-member -type properties | ForEach-Object {
         $prop  = $_.Name
@@ -374,10 +379,6 @@ function createAzureDeployment($config)
     $config["Name"] = $deploymentName                                                      # change the calculated name value to the deployment name value. It is incorrect since this is a deployment.
     $resourceType   = $config["ResourceType"]                                              # capture the resource type so we can retrieve the resourceId once the resource has been created
     $name           = $parameterFile.parameters.name.Value
-
-    if ($aksResourceGroupName -and $resourceType -eq 'AKS Network security group rule'){   # Deal with the exception case of the nsg rule inside the AKS Resource Group
-        $config["ResourceGroupName"]  = $aksResourceGroupName
-    } 
 
     $config
 
